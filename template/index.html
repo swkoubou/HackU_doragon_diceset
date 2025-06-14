@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hand Landmark Sender</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Hand Landmark Sender</h1>
+  <video id="input_video" width="640" height="480" autoplay muted></video>
+
+  <script>
+    const socket = io("http://localhost:5000");  // Flask-SocketIOサーバーのURLに合わせて変更
+
+    const videoElement = document.getElementById('input_video');
+
+    const hands = new Hands({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.5
+    });
+
+    hands.onResults((results) => {
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const landmarks = results.multiHandLandmarks[0].map(lm => [lm.x, lm.y, lm.z]);
+        socket.emit("landmark", landmarks);
+      }
+    });
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({ image: videoElement });
+      },
+      width: 640,
+      height: 480
+    });
+    camera.start();
+
+    // 30fpsで制御（33msごとに送信）
+    setInterval(() => {
+      // MediaPipe側の onResults が呼ばれるたびに emit するので、ここで制御不要でも可
+    }, 33);
+  </script>
+</body>
+</html>
