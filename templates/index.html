@@ -10,11 +10,12 @@
 <body>
   <h1>Hand Landmark Sender</h1>
   <video id="input_video" width="640" height="480" autoplay muted></video>
-
-  <script>
-    const socket = io("http://localhost:5000");  // Flask-SocketIOサーバーのURLに合わせて変更
+  
+  <p>認識結果: <span id="prediction_result">待機中...</span></p> <script>
+    const socket = io("http://localhost:5000"); // Flask-SocketIOサーバーのURLに合わせて変更
 
     const videoElement = document.getElementById('input_video');
+    const predictionResultElement = document.getElementById('prediction_result'); // 追加：結果表示用の要素を取得
 
     const hands = new Hands({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -42,6 +43,14 @@
       height: 480
     });
     camera.start();
+
+    // サーバーから 'result' イベントを受け取ったときの処理を追加
+    socket.on('result', (data) => {
+      if (data && data.text) { // データが存在し、'text' プロパティがあるか確認
+        predictionResultElement.textContent = data.text; // 結果を表示
+        console.log("サーバーからの予測結果:", data.text); // デバッグ用にコンソールにも表示
+      }
+    });
 
     // 30fpsで制御（33msごとに送信）
     setInterval(() => {

@@ -11,7 +11,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")  # CORSを許可（開発用�
 
 @app.route("/")
 def index():
-    return "Socket.IO server running"
+    return render_template("index.html")
 
 # クライアントから"landmark"イベントが送られたとき
 @socketio.on("landmark")
@@ -30,6 +30,7 @@ def predict_sign(landmarks):
     print("100フレームのランドマークを受け取りました。予測を実行します。")
     return {"text": "ありがとう"} 
 
+#接続が切れたらbuffersを削除
 @socketio.on('disconnect')
 def handle_disconnect():
     sid = request.sid
