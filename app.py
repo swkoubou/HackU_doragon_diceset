@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit, send
 from flask import request
 from collections import defaultdict, deque
 
+#
 buffers = defaultdict(lambda: deque(maxlen=100))
 
 app = Flask(__name__)
@@ -17,16 +18,26 @@ def index():
 @socketio.on("landmark")
 def handle_landmark(data):
     print("受け取ったランドマーク:", data)
+
+    #リクエストしてきたユーザー
     sid = request.sid
     buffers[sid].append(data)
+    print(len(buffers[sid]))
 
-    if len(buffers[sid]) == 100:
+    #buffersが30フレーム以上のデータを持つ
+    if len(buffers[sid]) == 30:
+        #手話翻訳関数からテキストを受け取る
         result = predict_sign(list(buffers[sid]))
+        #モバイルへ送信
         emit('result', result)
-        buffers[sid].clear()
 
+#手話翻訳関数
 def predict_sign(landmarks):
-    # ここに時系列モデルを使った処理を書く（仮のダミー）
+    #直近の30フレームから手が動いているか判別
+
+    #動いてるなら
+
+    #動いてないなら
     print("100フレームのランドマークを受け取りました。予測を実行します。")
     return {"text": "ありがとう"} 
 
