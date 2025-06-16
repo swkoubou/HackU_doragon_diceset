@@ -12,7 +12,7 @@
   <video id="input_video" width="640" height="480" autoplay muted></video>
   
   <p>認識結果: <span id="prediction_result">待機中...</span></p> <script>
-    const socket = io("http://localhost:5000"); // Flask-SocketIOサーバーのURLに合わせて変更
+    const socket = io("http://localhost:5001"); // Flask-SocketIOサーバーのURLに合わせて変更
 
     const videoElement = document.getElementById('input_video');
     const predictionResultElement = document.getElementById('prediction_result'); // 追加：結果表示用の要素を取得
@@ -31,6 +31,7 @@
     hands.onResults((results) => {
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarks = results.multiHandLandmarks[0].map(lm => [lm.x, lm.y, lm.z]);
+        console.log(landmarks)
         socket.emit("landmark", landmarks);
       }
     });
