@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- プライマリカラー -->
+    <color name="primary_color">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_light">#BBDEFB</color>
+
+    <!-- セカンダリカラー -->
+    <color name="secondary_color">#FF9800</color>
+    <color name="secondary_dark">#F57C00</color>
+    <color name="secondary_light">#FFE0B2</color>
+
+    <!-- 録画ボタン用カラー -->
+    <color name="record_color">#F44336</color>
+    <color name="record_dark">#D32F2F</color>
+
+    <!-- 音声録音ボタン用カラー -->
+    <color name="voice_record_color">#4CAF50</color>
+    <color name="voice_record_dark">#388E3C</color>
+
+    <!-- 録音停止ボタン用カラー -->
+    <color name="stop_record_color">#FF5722</color>
+    <color name="stop_record_dark">#E64A19</color>
+
+
+    <!-- テキストカラー -->
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+
+    <!-- 背景色 -->
+    <color name="background_color">#FAFAFA</color>
+    <color name="surface_color">#FFFFFF</color>
+
+    <!-- その他 -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="gray_light">#E0E0E0</color>
+
+    <!--よくわからんけど追加-->
+    <color name="purple_200">#BB86FC</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
+</resources>

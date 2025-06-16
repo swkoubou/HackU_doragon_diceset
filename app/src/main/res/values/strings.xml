@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">手話翻訳アプリ</string>
+
+    <!-- メイン画面 -->
+    <string name="main_title">翻訳アプリ</string>
+    <string name="main_subtitle">翻訳方法を選択してください</string>
+    <string name="btn_sign_language">手話翻訳</string>
+    <string name="btn_voice_translation">音声翻訳</string>
+
+
+    <!-- 手話翻訳画面 -->
+    <string name="sign_language_title">手話翻訳</string>
+    <string name="btn_record">📹\n録画開始</string>
+    <string name="btn_back_to_menu">メニューへ</string>
+    <string name="btn_record_again">再度録画</string>
+    <string name="initial_message">録画ボタンを押して手話動画を撮影してください</string>
+    <string name="loading_camera">カメラを起動中...</string>
+    <string name="loading_analysis">動画を解析中...</string>
+    <string name="result_prefix">翻訳結果:\n</string>
+    <string name="error_prefix">エラー: </string>
+
+
+
+
+
+    <!-- 音声翻訳画面 -->
+    <string name="voice_translation_title">音声翻訳</string>
+    <string name="btn_record_voice">🎤\n録音開始</string>
+    <string name="btn_stop_record">⏹ 録音停止</string>
+    <string name="btn_voice_back_to_menu">メニューへ</string>
+    <string name="btn_voice_record_again">再度録音</string>
+    <string name="voice_initial_message">録音ボタンを押して音声を録音してください</string>
+    <string name="voice_loading_analysis">音声を解析中...</string>
+    <string name="voice_recording_message">録音中... 停止ボタンを押すか、自動で30秒後に停止します</string>
+
+    <!-- エラーメッセージ -->
+    <string name="error_camera_permission">カメラの権限が必要です</string>
+    <string name="error_camera_app">カメラアプリが見つかりません</string>
+    <string name="error_video_cancelled">動画撮影がキャンセルされました</string>
+    <string name="error_server">サーバーエラー: %d</string>
+    <string name="error_network">通信エラー: %s</string>
+    <string name="error_general">エラーが発生しました: %s</string>
+    <string name="error_no_result">結果を取得できませんでした</string>
+</resources>
