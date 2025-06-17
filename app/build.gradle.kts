@@ -7,6 +7,10 @@ android {
     namespace = "com.example.ver1"
     compileSdk = 35
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId = "com.example.ver1"
         minSdk = 24
@@ -61,4 +65,13 @@ dependencies {
     testImplementation ("junit:junit:4.13.2")
     androidTestImplementation ("androidx.test.ext:junit:1.1.5")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
+
+    // CameraX
+    implementation ("androidx.camera:camera-core:1.3.0")
+    implementation ("androidx.camera:camera-camera2:1.3.0")
+    implementation ("androidx.camera:camera-lifecycle:1.3.0")
+    implementation ("androidx.camera:camera-view:1.3.0")
+
+    // MediaPipe Tasks SDK（手のランドマーカー）
+    implementation ("com.google.mediapipe:tasks-vision:0.10.14")
 }
