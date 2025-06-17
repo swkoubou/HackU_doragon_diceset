@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:background="@color/background_color">
+
+    <!-- タイトル -->
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="手話翻訳"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp" />
+
+    <!-- メイン表示エリア -->
+    <LinearLayout
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:gravity="center">
+
+        <!-- 録画ボタン -->
+        <Button
+            android:id="@+id/btn_record"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:text="📹\n録画開始"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_record"
+            android:textColor="@color/white"
+            android:elevation="8dp"
+            android:layout_marginBottom="32dp" />
+
+        <!-- ローディング表示 -->
+        <ProgressBar
+            android:id="@+id/progress_loading"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_centerInParent="true"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 結果表示テキスト -->
+        <TextView
+            android:id="@+id/tv_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="録画ボタンを押して手話動画を撮影してください"
+            android:textSize="16sp"
+            android:textColor="@color/primary_text"
+            android:gravity="center"
+            android:padding="16dp"
+            android:background="@drawable/result_background"
+            android:minHeight="120dp"
+            android:layout_marginBottom="24dp" />
+
+    </LinearLayout>
+
+    <!-- 下部ボタンエリア -->
+    <LinearLayout
+        android:id="@+id/bottom_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="24dp"
+        android:gravity="center">
+
+        <!-- メニューに戻るボタン -->
+        <Button
+            android:id="@+id/btn_back_to_menu"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="メニューへ"
+            android:textSize="16sp"
+            android:background="@drawable/button_secondary"
+            android:textColor="@color/white"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone" />
+
+        <!-- 再度録画ボタン -->
+        <Button
+            android:id="@+id/btn_record_again"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="再度録画"
+            android:textSize="16sp"
+            android:background="@drawable/button_primary"
+            android:textColor="@color/white"
+            android:layout_marginStart="8dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</RelativeLayout>
