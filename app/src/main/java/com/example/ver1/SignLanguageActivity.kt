@@ -1,222 +1,155 @@
 package com.example.ver1
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
+import android.graphics.*
 import android.os.Bundle
-import android.provider.MediaStore
-import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.os.SystemClock
+import android.util.Log
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import kotlinx.coroutines.*
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
-import java.io.IOException
+import com.example.ver1.databinding.ActivitySignLanguageBinding
+import com.google.mediapipe.framework.image.BitmapImageBuilder
+import com.google.mediapipe.tasks.core.BaseOptions
+import com.google.mediapipe.tasks.vision.core.RunningMode
+import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
+import java.io.ByteArrayOutputStream
 
 class SignLanguageActivity : AppCompatActivity() {
-
-    private lateinit var recordButton: Button
-    private lateinit var resultText: TextView
-    private lateinit var loadingProgressBar: ProgressBar
-    private lateinit var backToMenuButton: Button
-    private lateinit var recordAgainButton: Button
-
-    private var videoUri: Uri? = null
-    private val client = OkHttpClient()
-
-    // カメラ起動用のランチャー
-    private val videoCapture = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            // 動画撮影完了後、サーバーに送信
-            videoUri?.let { uri ->
-                uploadVideoToServer(uri)
-            }
-        } else {
-            hideLoading()
-            Toast.makeText(this, "動画撮影がキャンセルされました", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // 権限リクエスト用のランチャー
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            startVideoCapture()
-        } else {
-            Toast.makeText(this, "カメラの権限が必要です", Toast.LENGTH_SHORT).show()
-        }
-    }
+    private lateinit var binding: ActivitySignLanguageBinding
+    private lateinit var handLandmarker: HandLandmarker
+    private var isFrontCamera = true // 追加部分：カメラが前面か背面かを記録
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sign_language)
+        binding = ActivitySignLanguageBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        initViews()
-        setupClickListeners()
-    }
-
-    private fun initViews() {
-        recordButton = findViewById(R.id.btn_record)
-        resultText = findViewById(R.id.tv_result)
-        loadingProgressBar = findViewById(R.id.progress_loading)
-        backToMenuButton = findViewById(R.id.btn_back_to_menu)
-        recordAgainButton = findViewById(R.id.btn_record_again)
-
-        // 初期状態では結果関連のボタンを非表示
-        backToMenuButton.visibility = View.GONE
-        recordAgainButton.visibility = View.GONE
-    }
-
-    private fun setupClickListeners() {
-        recordButton.setOnClickListener {
-            checkCameraPermissionAndStart()
+        // 追加部分：カメラ切り替えボタンの動作を設定
+        binding.switchCameraButton.setOnClickListener {
+            isFrontCamera = !isFrontCamera // フロント/バックを切り替え
+            startCamera() // カメラ再起動
         }
 
-        backToMenuButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            // 既存のアクティビティスタックをクリアして新しくメイン画面を開く
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            finish()
-        }
-
-        recordAgainButton.setOnClickListener {
-            // 画面をリセットして再度録画可能にする
-            resetScreen()
-            checkCameraPermissionAndStart()
-        }
-    }
-
-    private fun checkCameraPermissionAndStart() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                startVideoCapture()
-            }
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }
-        }
-    }
-
-    private fun startVideoCapture() {
-        showLoading("カメラを起動中...")
-
-        val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
-            // 動画の保存先を指定
-            val videoFile = File(externalCacheDir, "sign_language_video.mp4")
-            videoUri = FileProvider.getUriForFile(
-                this@SignLanguageActivity,
-                "${packageName}.fileprovider",
-                videoFile
-            )
-            putExtra(MediaStore.EXTRA_OUTPUT, videoUri)
-            putExtra(MediaStore.EXTRA_DURATION_LIMIT, 30) // 最大30秒
-        }
-
-        if (intent.resolveActivity(packageManager) != null) {
-            videoCapture.launch(intent)
+        if (allPermissionsGranted()) {
+            setupHandLandmarker()
+            startCamera()
         } else {
-            hideLoading()
-            Toast.makeText(this, "カメラアプリが見つかりません", Toast.LENGTH_SHORT).show()
+            requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
     }
 
-    private fun uploadVideoToServer(uri: Uri) {
-        showLoading("動画を解析中...")
+    private fun setupHandLandmarker() {
+        val baseOptions = BaseOptions.builder()
+            .setModelAssetPath("hand_landmarker.task")
+            .build()
 
-        // コルーチンを使用して非同期処理
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val file = File(uri.path ?: "")
+        val options = HandLandmarker.HandLandmarkerOptions.builder()
+            .setBaseOptions(baseOptions)
+            .setRunningMode(RunningMode.LIVE_STREAM)
+            .setResultListener { result, _ ->
+                runOnUiThread {
+                    // ログ出力
+                    result.landmarks().forEachIndexed { index, hand ->
+                        Log.d("Hand $index", hand.joinToString {
+                            "(${it.x()}, ${it.y()})"
+                        })
+                    }
+                    // 追加部分：Overlay に結果を渡す
+                    binding.overlay.setResults(result) // 追加部分
+                }
+            }
+            .build()
 
-                // マルチパートリクエストを作成
-                val requestBody = MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart(
-                        "video",
-                        file.name,
-                        file.asRequestBody("video/mp4".toMediaType())
-                    )
-                    .build()
+        handLandmarker = HandLandmarker.createFromOptions(this, options)
+    }
 
-                val request = Request.Builder()
-                    .url("http://YOUR_FLASK_SERVER_URL/translate") // 実際のサーバーURLに変更してください
-                    .post(requestBody)
-                    .build()
+    private fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
 
-                val response = client.newCall(request).execute()
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(binding.previewView.surfaceProvider)
+            }
 
-                withContext(Dispatchers.Main) {
-                    hideLoading()
-                    if (response.isSuccessful) {
-                        val result = response.body?.string() ?: "結果を取得できませんでした"
-                        showResult(result)
-                    } else {
-                        showError("サーバーエラー: ${response.code}")
+            val imageAnalysis = ImageAnalysis.Builder().build().also {
+                it.setAnalyzer(ContextCompat.getMainExecutor(this)) { imageProxy ->
+                    try {
+                        val bitmap = imageProxyToBitmap(imageProxy, isFrontCamera) // 追加部分：isFrontCamera対応
+                        val mpImage = BitmapImageBuilder(bitmap).build()
+                        handLandmarker.detectAsync(mpImage, SystemClock.uptimeMillis())
+                    } catch (e: Exception) {
+                        Log.e("CameraAnalyzer", "Error processing image", e)
+                    } finally {
+                        imageProxy.close()
                     }
                 }
-
-            } catch (e: IOException) {
-                withContext(Dispatchers.Main) {
-                    hideLoading()
-                    showError("通信エラー: ${e.message}")
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    hideLoading()
-                    showError("エラーが発生しました: ${e.message}")
-                }
             }
+
+            val cameraSelector = if (isFrontCamera) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA // 追加部分：カメラ切り替え対応
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
+        }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun allPermissionsGranted(): Boolean {
+        return REQUIRED_PERMISSIONS.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
-    private fun showLoading(message: String) {
-        loadingProgressBar.visibility = View.VISIBLE
-        resultText.text = message
-        recordButton.visibility = View.GONE
-        backToMenuButton.visibility = View.GONE
-        recordAgainButton.visibility = View.GONE
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults) // 追加部分：super呼び出し
+        if (requestCode == REQUEST_CODE_PERMISSIONS && allPermissionsGranted()) {
+            setupHandLandmarker()
+            startCamera()
+        } else {
+            Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show()
+            finish()
+        }
     }
 
-    private fun hideLoading() {
-        loadingProgressBar.visibility = View.GONE
+    companion object {
+        private const val REQUEST_CODE_PERMISSIONS = 10
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
 
-    private fun showResult(result: String) {
-        resultText.text = "翻訳結果:\n$result"
-        recordButton.visibility = View.GONE
-        backToMenuButton.visibility = View.VISIBLE
-        recordAgainButton.visibility = View.VISIBLE
-    }
+    @OptIn(ExperimentalGetImage::class)
+    fun imageProxyToBitmap(imageProxy: ImageProxy, isFrontCamera: Boolean): Bitmap { // 追加部分：isFrontCameraを受け取る
+        val image = imageProxy.image ?: throw IllegalArgumentException("Image is null")
+        val yBuffer = image.planes[0].buffer
+        val uBuffer = image.planes[1].buffer
+        val vBuffer = image.planes[2].buffer
 
-    private fun showError(error: String) {
-        resultText.text = "エラー: $error"
-        recordButton.visibility = View.VISIBLE
-        backToMenuButton.visibility = View.VISIBLE
-        recordAgainButton.visibility = View.GONE
-    }
+        val ySize = yBuffer.remaining()
+        val uSize = uBuffer.remaining()
+        val vSize = vBuffer.remaining()
 
-    private fun resetScreen() {
-        resultText.text = "録画ボタンを押して手話動画を撮影してください"
-        recordButton.visibility = View.VISIBLE
-        backToMenuButton.visibility = View.GONE
-        recordAgainButton.visibility = View.GONE
-        loadingProgressBar.visibility = View.GONE
+        val nv21 = ByteArray(ySize + uSize + vSize)
+        yBuffer.get(nv21, 0, ySize)
+        vBuffer.get(nv21, ySize, vSize)
+        uBuffer.get(nv21, ySize + vSize, uSize)
+
+        val yuvImage = YuvImage(nv21, ImageFormat.NV21, image.width, image.height, null)
+        val out = ByteArrayOutputStream()
+        yuvImage.compressToJpeg(Rect(0, 0, image.width, image.height), 100, out)
+        val imageBytes = out.toByteArray()
+
+        var bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+        // 追加部分：回転補正とミラー反転処理
+        val matrix = Matrix()
+        matrix.postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
+        if (isFrontCamera) {
+            matrix.postScale(-1f, 1f) // ミラー反転
+        }
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+
+        return bitmap
     }
 }
