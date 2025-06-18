@@ -15,13 +15,8 @@
     let recording = false;
     let landmarkBuffer = [];
     let frameCount = 0;
-<<<<<<< HEAD
-    const maxFrames = 50;
-    
-=======
     const maxFrames = 80;
 
->>>>>>> parent of 78ae249 (は～ん)
     const videoElement = document.querySelector('.input_video');
     const hands = new Hands({ locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
     hands.setOptions({
