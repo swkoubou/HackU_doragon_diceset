@@ -5,7 +5,7 @@ import io.socket.client.Socket
 import org.json.JSONArray
 import org.json.JSONObject
 
-class LandmarkSocketIOClient(serverUrl: String) {
+class LandmarkSocketIOClient(serverUrl: String, private val onResult: (String) -> Unit) {
 
     private var socket: Socket = IO.socket(serverUrl)
 
@@ -18,6 +18,11 @@ class LandmarkSocketIOClient(serverUrl: String) {
             if (args.isNotEmpty()) {
                 val data = args[0] as JSONObject
                 println("サーバーからの結果受信: $data")
+                // 翻訳結果を取得してコールバック実行
+                val text = data.optString("text", "")
+                if (text.isNotEmpty()) {
+                    onResult(text)
+                }
             }
         }
         socket.connect()
@@ -41,7 +46,9 @@ class LandmarkSocketIOClient(serverUrl: String) {
         socket.emit("landmark", json)
     }
 
-
+    fun disconnect() {
+        socket.disconnect()
+    }
 }
 
 data class Landmark(val x: Float, val y: Float, val z: Float)
