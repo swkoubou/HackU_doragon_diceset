@@ -16,7 +16,7 @@
     let landmarkBuffer = [];
     let frameCount = 0;
     const maxFrames = 50;
-
+    
     const videoElement = document.querySelector('.input_video');
     const hands = new Hands({ locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
     hands.setOptions({
