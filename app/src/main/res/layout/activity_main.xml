@@ -11,11 +11,21 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="翻訳アプリ"
+        android:text="しゅわりん？"
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/primary_text"
         android:layout_marginBottom="48dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="～言葉を超える、手の声～"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text"
+        android:layout_marginBottom="40dp" />
+
 
     <!-- 説明テキスト -->
     <TextView
