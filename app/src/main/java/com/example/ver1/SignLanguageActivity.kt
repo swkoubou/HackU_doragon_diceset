@@ -18,7 +18,7 @@ import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
-import kotlinx.coroutines.*
+
 import java.io.ByteArrayOutputStream
 
 class SignLanguageActivity : AppCompatActivity() {
