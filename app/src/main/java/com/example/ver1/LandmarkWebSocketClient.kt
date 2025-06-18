@@ -2,7 +2,6 @@ package com.example.ver1
 
 import io.socket.client.IO
 import io.socket.client.Socket
-import io.socket.emitter.Emitter
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -42,9 +41,7 @@ class LandmarkSocketIOClient(serverUrl: String) {
         socket.emit("landmark", json)
     }
 
-    fun close() {
-        socket.disconnect()
-    }
+
 }
 
 data class Landmark(val x: Float, val y: Float, val z: Float)

@@ -1,6 +1,6 @@
 package com.example.ver1
 
-import com.example.ver1.Landmark  // 必要に応じて
+
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
