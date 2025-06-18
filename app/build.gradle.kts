@@ -74,4 +74,8 @@ dependencies {
 
     // MediaPipe Tasks SDK（手のランドマーカー）
     implementation ("com.google.mediapipe:tasks-vision:0.10.14")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("io.socket:socket.io-client:2.0.1") {
+        exclude(group = "org.json", module = "json")
+    }
 }
