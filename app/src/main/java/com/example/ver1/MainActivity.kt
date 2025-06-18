@@ -1,5 +1,6 @@
 package com.example.ver1
 
+
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -14,6 +15,18 @@ class MainActivity : AppCompatActivity() {
         // UI要素を取得
         val signLanguageButton = findViewById<Button>(R.id.btn_sign_language)
         val voiceTranslationButton = findViewById<Button>(R.id.btn_voice_translation)
+
+        val socketClient = LandmarkSocketIOClient("http://192.168.x.x:5000")  // サーバーIPに置き換えてください
+        socketClient.connect()
+
+// 送信例
+        val landmarks = listOf(
+            Landmark(0.1f, 0.2f, 0.0f),
+            Landmark(0.3f, 0.4f, 0.0f)
+        )
+
+        socketClient.sendLandmarks(landmarks)
+
 
 
 
