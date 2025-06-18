@@ -8,15 +8,11 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <!-- 古い端末への互換性が必要なら、以下も条件付きで残す -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
+
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
+
 
 
 
@@ -39,8 +35,7 @@
         <!-- LAUNCHER の MainActivity -->
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:screenOrientation="portrait">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -50,14 +45,13 @@
         <!-- SignLanguageActivity は 1 回だけ宣言 -->
         <activity
             android:name=".SignLanguageActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <!-- 音声翻訳アクティビティ -->
         <activity
             android:name=".VoiceTranslationActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
+
 
         <!-- ★ provider は 1 つだけで OK ★ -->
         <provider
