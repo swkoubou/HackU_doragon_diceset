@@ -19,6 +19,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.IOException
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import java.util.Locale
+
 
 class VoiceTranslationActivity : AppCompatActivity() {
 
@@ -33,6 +38,8 @@ class VoiceTranslationActivity : AppCompatActivity() {
     private var audioFile: File? = null
     private var isRecording = false
     private val client = OkHttpClient()
+    private var speechRecognizer: SpeechRecognizer? = null
+
 
     // 権限リクエスト用のランチャー
     private val requestPermissionLauncher = registerForActivityResult(
@@ -54,6 +61,36 @@ class VoiceTranslationActivity : AppCompatActivity() {
 
         initViews()
         setupClickListeners()
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        speechRecognizer?.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                Toast.makeText(this@VoiceTranslationActivity, "音声認識を開始します", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onBeginningOfSpeech() {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onEndOfSpeech() {}
+            override fun onError(error: Int) {
+                Toast.makeText(this@VoiceTranslationActivity, "認識エラー: $error", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResults(results: Bundle?) {
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                if (!matches.isNullOrEmpty()) {
+                    val recognizedText = matches[0]
+                    showResult("音声認識結果:\n$recognizedText")
+                } else {
+                    showResult("音声を認識できませんでした")
+                }
+            }
+
+            override fun onPartialResults(partialResults: Bundle?) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+
+
     }
 
     private fun initViews() {
@@ -273,9 +310,19 @@ class VoiceTranslationActivity : AppCompatActivity() {
         resetScreen()
     }
 
+    private fun startSpeechRecognition() {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "話してください")
+        }
+        speechRecognizer?.startListening(intent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         resetRecorder()
+        speechRecognizer?.destroy()
     }
 
     override fun onPause() {
