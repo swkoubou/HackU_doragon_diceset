@@ -18,7 +18,7 @@ import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
-
+import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 
 class SignLanguageActivity : AppCompatActivity() {
@@ -29,6 +29,8 @@ class SignLanguageActivity : AppCompatActivity() {
     private val serverUrl = "https://ryuichi.tail93a4a4.ts.net/"
     private var lastSentTime = 0L
     private val sendInterval = 500L // 500ms間隔で送信
+    private var isRecording = false // 録画状態管理
+    private var imageAnalysis: ImageAnalysis? = null // ImageAnalysisの参照を保持
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +39,15 @@ class SignLanguageActivity : AppCompatActivity() {
 
         // Socket.IOクライアントの初期化
         initializeSocketClient()
+
+        // 録画制御ボタンの設定
+        binding.btnStartRecording.setOnClickListener {
+            startRecording()
+        }
+
+        binding.btnStopRecording.setOnClickListener {
+            stopRecording()
+        }
 
         // 追加部分：カメラ切り替えボタンの動作を設定
         binding.switchCameraButton.setOnClickListener {
@@ -50,6 +61,9 @@ class SignLanguageActivity : AppCompatActivity() {
         } else {
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
+
+        // 初期状態は録画停止
+        updateRecordingUI(false)
     }
 
     private fun initializeSocketClient() {
@@ -99,12 +113,15 @@ class SignLanguageActivity : AppCompatActivity() {
                 it.setSurfaceProvider(binding.previewView.surfaceProvider)
             }
 
-            val imageAnalysis = ImageAnalysis.Builder().build().also {
+            imageAnalysis = ImageAnalysis.Builder().build().also {
                 it.setAnalyzer(ContextCompat.getMainExecutor(this)) { imageProxy ->
                     try {
-                        val bitmap = imageProxyToBitmap(imageProxy, isFrontCamera) // 追加部分：isFrontCamera対応
-                        val mpImage = BitmapImageBuilder(bitmap).build()
-                        handLandmarker.detectAsync(mpImage, SystemClock.uptimeMillis())
+                        // 録画中の場合のみ処理
+                        if (isRecording) {
+                            val bitmap = imageProxyToBitmap(imageProxy, isFrontCamera) // 追加部分：isFrontCamera対応
+                            val mpImage = BitmapImageBuilder(bitmap).build()
+                            handLandmarker.detectAsync(mpImage, SystemClock.uptimeMillis())
+                        }
                     } catch (e: Exception) {
                         Log.e("CameraAnalyzer", "Error processing image", e)
                     } finally {
@@ -115,7 +132,7 @@ class SignLanguageActivity : AppCompatActivity() {
 
             val cameraSelector = if (isFrontCamera) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA // 追加部分：カメラ切り替え対応
             cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
+            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis!!)
         }, ContextCompat.getMainExecutor(this))
     }
 
@@ -134,6 +151,7 @@ class SignLanguageActivity : AppCompatActivity() {
             Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show()
             finish()
         }
+        updateRecordingUI(false)
     }
 
     companion object {
@@ -216,6 +234,34 @@ class SignLanguageActivity : AppCompatActivity() {
     private fun showError(message: String) {
         showLoading(false)
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun startRecording() {
+        isRecording = true
+        updateRecordingUI(true)
+        binding.translationResult.text = "手話録画中..."
+        Toast.makeText(this, "手話の録画を開始しました", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun stopRecording() {
+        isRecording = false
+        updateRecordingUI(false)
+        binding.translationResult.text = "録画を停止しました"
+        Toast.makeText(this, "手話の録画を停止しました", Toast.LENGTH_SHORT).show()
+
+        // オーバーレイをクリア
+        binding.overlay.setResults(null)
+        showLoading(false)
+    }
+
+    private fun updateRecordingUI(recording: Boolean) {
+        if (recording) {
+            binding.btnStartRecording.visibility = View.GONE
+            binding.btnStopRecording.visibility = View.VISIBLE
+        } else {
+            binding.btnStartRecording.visibility = View.VISIBLE
+            binding.btnStopRecording.visibility = View.GONE
+        }
     }
 
     override fun onDestroy() {
