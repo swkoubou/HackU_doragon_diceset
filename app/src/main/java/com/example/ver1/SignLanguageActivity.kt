@@ -93,7 +93,7 @@ class SignLanguageActivity : AppCompatActivity() {
                         })
                     }
                     // 追加部分：Overlay に結果を渡す
-                    binding.overlay.setResults(result)
+                    (binding.overlay as HandOverlayView).setResults(result)
 
                     // ランドマークデータをサーバーに送信
                     sendLandmarksToServer(result)
@@ -250,7 +250,7 @@ class SignLanguageActivity : AppCompatActivity() {
         Toast.makeText(this, "手話の録画を停止しました", Toast.LENGTH_SHORT).show()
 
         // オーバーレイをクリア
-        binding.overlay.setResults(null)
+        (binding.overlay as HandOverlayView).setResults(null)
         showLoading(false)
     }
 

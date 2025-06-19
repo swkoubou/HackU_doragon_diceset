@@ -12,6 +12,9 @@
     <!-- 手話翻訳画面 -->
     <string name="sign_language_title">手話翻訳</string>
     <string name="btn_record">📹\n録画開始</string>
+    <string name="btn_start_recording">録画開始</string>
+    <string name="btn_stop_recording">録画停止</string>
+    <string name="btn_switch_camera">切替</string>
     <string name="btn_back_to_menu">メニューへ</string>
     <string name="btn_record_again">再度録画</string>
     <string name="initial_message">録画ボタンを押して手話動画を撮影してください</string>

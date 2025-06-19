@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="録画開始"
+            android:text="@string/btn_start_recording"
             android:background="@drawable/button_primary"
             android:textColor="@android:color/white" />
 
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="録画停止"
+            android:text="@string/btn_stop_recording"
             android:background="@drawable/button_secondary"
             android:textColor="@android:color/white"
             android:visibility="gone" />
@@ -76,7 +76,7 @@
         android:id="@+id/switchCameraButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="切替"
+        android:text="@string/btn_switch_camera"
         android:layout_margin="16dp"
         android:layout_gravity="top|end" />
 
