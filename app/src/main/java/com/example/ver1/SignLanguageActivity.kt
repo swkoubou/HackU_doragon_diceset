@@ -18,7 +18,6 @@ import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
-import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 
 class SignLanguageActivity : AppCompatActivity() {
@@ -93,7 +92,7 @@ class SignLanguageActivity : AppCompatActivity() {
                         })
                     }
                     // 追加部分：Overlay に結果を渡す
-                    (binding.overlay as HandOverlayView).setResults(result)
+                    binding.overlay.setResults(result)
 
                     // ランドマークデータをサーバーに送信
                     sendLandmarksToServer(result)
@@ -250,7 +249,7 @@ class SignLanguageActivity : AppCompatActivity() {
         Toast.makeText(this, "手話の録画を停止しました", Toast.LENGTH_SHORT).show()
 
         // オーバーレイをクリア
-        (binding.overlay as HandOverlayView).setResults(null)
+        binding.overlay.setResults(null)
         showLoading(false)
     }
 
