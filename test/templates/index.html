@@ -11,11 +11,19 @@
   <h1>Hand Landmark Sender</h1>
   <video id="input_video" width="640" height="480" autoplay muted></video>
   
-  <p>認識結果: <span id="prediction_result">待機中...</span></p> <script>
-    const socket = io("http://localhost:5002"); // Flask-SocketIOサーバーのURLに合わせて変更
+  <div>
+    <p>認識結果: <span id="prediction_result">待機中...</span></p>
+    <p>信頼度: <span id="confidence">-</span></p>
+    <p>最終結果: <span id="final_result">-</span></p>
+  </div>
+
+  <script>
+    const socket = io("http://localhost:4000");
 
     const videoElement = document.getElementById('input_video');
-    const predictionResultElement = document.getElementById('prediction_result'); // 追加：結果表示用の要素を取得
+    const predictionResultElement = document.getElementById('prediction_result');
+    const confidenceElement = document.getElementById('confidence');
+    const finalResultElement = document.getElementById('final_result');
 
     const hands = new Hands({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -31,8 +39,15 @@
     hands.onResults((results) => {
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarks = results.multiHandLandmarks[0].map(lm => [lm.x, lm.y, lm.z]);
-        console.log(landmarks)
-        socket.emit("landmark", landmarks);
+        console.log("送信するランドマーク:", landmarks.length, "点");
+        
+        // 修正：正しい形式でデータを送信
+        socket.emit("landmark", {
+          landmarks: landmarks
+        });
+      } else {
+        // 手が検出されない場合は空のデータを送信
+        socket.emit("landmark", null);
       }
     });
 
@@ -45,18 +60,39 @@
     });
     camera.start();
 
-    // サーバーから 'result' イベントを受け取ったときの処理を追加
-    socket.on('result', (data) => {
-      if (data && data.text) { // データが存在し、'text' プロパティがあるか確認
-        predictionResultElement.textContent = data.text; // 結果を表示
-        console.log("サーバーからの予測結果:", data.text); // デバッグ用にコンソールにも表示
+    // 部分結果の受信
+    socket.on('partial_result', (data) => {
+      if (data && data.text) {
+        predictionResultElement.textContent = data.text;
+        confidenceElement.textContent = data.confidence.toFixed(2);
+        console.log("部分結果:", data.text, "信頼度:", data.confidence);
       }
     });
 
-    // 30fpsで制御（33msごとに送信）
-    setInterval(() => {
-      // MediaPipe側の onResults が呼ばれるたびに emit するので、ここで制御不要でも可
-    }, 33);
+    // 最終結果の受信
+    socket.on('final_result', (data) => {
+      if (data) {
+        finalResultElement.textContent = data.refined_text || data.raw_text;
+        console.log("最終結果:", data);
+      }
+    });
+
+    // セッションリセット結果
+    socket.on('session_reset', (data) => {
+      console.log("セッションリセット:", data);
+      predictionResultElement.textContent = "待機中...";
+      confidenceElement.textContent = "-";
+      finalResultElement.textContent = "-";
+    });
+
+    // 接続状態の監視
+    socket.on('connect', () => {
+      console.log('サーバーに接続しました');
+    });
+
+    socket.on('disconnect', () => {
+      console.log('サーバーから切断されました');
+    });
   </script>
 </body>
 </html>
