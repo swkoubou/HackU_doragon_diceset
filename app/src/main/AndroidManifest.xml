@@ -12,6 +12,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- 権限追加 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- 音声録音に必要 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- 外部ストレージへの書き込み -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+
 
     <!-- アプリはカメラが無くても動く（required="false"） -->
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
