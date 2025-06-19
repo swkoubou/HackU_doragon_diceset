@@ -17,7 +17,11 @@ def upload():
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{label}_{timestamp}.csv"
+<<<<<<< HEAD
     save_dir = "dakutenn1"
+=======
+    save_dir = "a_no_1"
+>>>>>>> cdecacf69bf9fb0d35bae10c7f257e04b6116464
     os.makedirs(save_dir, exist_ok=True)
 
     filepath = os.path.join(save_dir, filename)
