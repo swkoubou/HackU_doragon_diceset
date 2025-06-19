@@ -46,9 +46,8 @@ class VoiceTranslationActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val audioPermissionGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
-        val storagePermissionGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: false
 
-        if (audioPermissionGranted && storagePermissionGranted) {
+        if (audioPermissionGranted) {
             startAudioRecording()
         } else {
             Toast.makeText(this, "音声録音の権限が必要です", Toast.LENGTH_SHORT).show()
@@ -131,17 +130,14 @@ class VoiceTranslationActivity : AppCompatActivity() {
 
     private fun checkPermissionsAndStart() {
         val audioPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-        val storagePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
         when {
-            audioPermission == PackageManager.PERMISSION_GRANTED &&
-                    storagePermission == PackageManager.PERMISSION_GRANTED -> {
+            audioPermission == PackageManager.PERMISSION_GRANTED -> {
                 startAudioRecording()
             }
             else -> {
                 requestPermissionLauncher.launch(arrayOf(
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    Manifest.permission.RECORD_AUDIO
                 ))
             }
         }
