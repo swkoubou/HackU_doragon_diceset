@@ -72,7 +72,7 @@ def handle_landmark(data):
             'timestamp': current_time
         }
         
-        emit('sentence_result', sentence_data)
+        emit('result', sentence_data)
         print(f"[{current_time}] 📝 文章完了: '{demo_sentence}' → '{sentence_data['refined_text']}'")
 
 @socketio.on('connect')
