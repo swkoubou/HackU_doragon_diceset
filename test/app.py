@@ -25,7 +25,10 @@ user_data = defaultdict(lambda: {
     'error_counter': 0,
     'frame_counter': 0,
     'last_prediction_time': 0,
-    'prediction_history': deque(maxlen=10)
+    'prediction_history': deque(maxlen=10),
+    'static_landmark_counter': 0,  # 同じランドマークの連続カウント
+    'last_landmark_data': None,    # 前回のランドマークデータ
+    'static_threshold': 20         # 静的ランドマークの閾値
 })
 
 app = Flask(__name__)
@@ -70,6 +73,27 @@ def load_model_and_encoder():
     except Exception as e:
         logger.error(f"モデル読み込みエラー: {e}")
         return None, None
+
+def is_static_landmark(landmarks):
+    """ランドマークが静的（すべて同じ値）かどうかを判定"""
+    if not landmarks or len(landmarks) == 0:
+        return False
+    
+    try:
+        # すべてのランドマークが同じ値かチェック
+        first_landmark = landmarks[0]
+        for landmark in landmarks:
+            if landmark != first_landmark:
+                return False
+        
+        # さらに、[1, 0, 0]のような特定のパターンかチェック
+        if first_landmark == [1, 0, 0]:
+            return True
+            
+        return False
+    except Exception as e:
+        logger.error(f"静的ランドマーク判定エラー: {e}")
+        return False
 
 class MultiWindowRecognizer:
     def __init__(self):
@@ -161,18 +185,16 @@ def index():
 def handle_landmark(data):
     sid = request.sid
     user = user_data[sid]
-    landmark_data = None  # 先に初期化
-   #print(f"Received data type: {type(data)}, data: {data}")
-    print(user['error_counter'])
+    landmark_data = None
+    print(f"Received data type: {type(data)}, data: {data}")
+    print(f"Error counter: {user['error_counter']}, Static counter: {user['static_landmark_counter']}")
 
     if isinstance(data, list) and data:
         landmark_data = data
     elif isinstance(data, dict) and 'landmarks' in data:
         try:
             landmarks = data["landmarks"]
-            # 送られてきたlandmarksの形式に合わせて処理（ここではそのまま代入）
             landmark_data = landmarks
-            # もし座標抽出など加工が必要ならここで行う
         except Exception as e:
             logger.error(f"ランドマーク変換エラー: {e}")
             user['error_counter'] += 1
@@ -182,14 +204,56 @@ def handle_landmark(data):
         return
 
     if landmark_data is not None:
+        # 静的ランドマークの検出
+        if is_static_landmark(landmark_data):
+            user['static_landmark_counter'] += 1
+            logger.info(f"静的ランドマーク検出: {user['static_landmark_counter']}/{user['static_threshold']}")
+            
+            # 閾値に達した場合の処理
+            if user['static_landmark_counter'] >= user['static_threshold']:
+                logger.info("静的ランドマークが閾値に達しました。AIテキスト処理を開始します。")
+                
+                # テキストバッファにデータがある場合、AIで処理
+                if user['text_buffer']:
+                    raw_text = ' '.join(user['text_buffer'])
+                    logger.info(f"AI処理開始 - Raw text: {raw_text}")
+                    refined_text = refine_text_with_ai(raw_text)
+                    
+                    emit('result', {
+                        'trigger': 'static_landmark_detected',
+                        'raw_text': raw_text,
+                        'refined_text': refined_text,
+                        'prediction_history': list(user['prediction_history']),
+                        'static_count': user['static_landmark_counter']
+                    })
+                    
+                    # バッファをクリア
+                    user['text_buffer'].clear()
+                    user['prediction_history'].clear()
+                else:
+                    logger.info("テキストバッファが空のため、AI処理をスキップします。")
+                    emit('result', {
+                        'trigger': 'static_landmark_detected',
+                        'message': '静的ランドマークを検出しましたが、処理するテキストがありません。',
+                        'static_count': user['static_landmark_counter']
+                    })
+                
+                # カウンターをリセット
+                user['static_landmark_counter'] = 0
+        else:
+            # 静的でない場合はカウンターをリセット
+            if user['static_landmark_counter'] > 0:
+                logger.info("動的ランドマーク検出 - 静的カウンターをリセット")
+                user['static_landmark_counter'] = 0
+        
+        # 通常の処理
         user['frame_buffer'].append(landmark_data)
         user['frame_counter'] += 1
-       #print(landmark_data)
+        user['last_landmark_data'] = landmark_data
     else:
         user['error_counter'] += 1
 
-
-
+    # 通常の予測処理
     if user['frame_counter'] % 5 == 0 and recognizer.model_loaded:
         now = time.time()
         if now - user['last_prediction_time'] > 0.5:
@@ -206,11 +270,13 @@ def handle_landmark(data):
                     'prediction_count': len(user['prediction_history'])
                 })
 
+    # 従来のエラーカウンターによる処理
     if user['error_counter'] >= 20:
         if user['text_buffer']:
             raw_text = ' '.join(user['text_buffer'])
             refined_text = refine_text_with_ai(raw_text)
             emit('result', {
+                'trigger': 'error_threshold',
                 'raw_text': raw_text,
                 'refined_text': refined_text,
                 'prediction_history': list(user['prediction_history'])
@@ -240,7 +306,6 @@ def wordEdit(input_text):
     response = model.generate_content(prompt)
     return response.text.strip()
 
-
 def refine_text_with_ai(raw_text):
     try:
         # Gemini APIを呼んで整形する
@@ -251,6 +316,7 @@ def refine_text_with_ai(raw_text):
     except Exception as e:
         logger.error(f"整形エラー: {e}")
         return raw_text
+
 @socketio.on('disconnect')
 def handle_disconnect():
     sid = request.sid
@@ -267,7 +333,10 @@ def handle_reset():
             'error_counter': 0,
             'frame_counter': 0,
             'last_prediction_time': 0,
-            'prediction_history': deque(maxlen=10)
+            'prediction_history': deque(maxlen=10),
+            'static_landmark_counter': 0,
+            'last_landmark_data': None,
+            'static_threshold': 20
         }
         emit('session_reset', {'status': 'success'})
         logger.info(f"セッションリセット: {sid}")
@@ -282,13 +351,28 @@ def handle_debug_info():
         'text_buffer': user['text_buffer'],
         'error_counter': user['error_counter'],
         'frame_counter': user['frame_counter'],
-        'prediction_history': list(user['prediction_history'])
+        'prediction_history': list(user['prediction_history']),
+        'static_landmark_counter': user['static_landmark_counter'],
+        'static_threshold': user['static_threshold']
     }
     if recognizer.model_loaded:
         debug_info['model_input_shape'] = str(recognizer.model.input_shape)
         if hasattr(recognizer.label_encoder, 'classes_'):
             debug_info['class_count'] = len(recognizer.label_encoder.classes_)
     emit('debug_info', debug_info)
+
+@socketio.on('set_static_threshold')
+def handle_set_threshold(data):
+    """静的ランドマークの閾値を動的に変更"""
+    sid = request.sid
+    user = user_data[sid]
+    try:
+        threshold = int(data.get('threshold', 20))
+        user['static_threshold'] = max(1, min(threshold, 100))  # 1-100の範囲で制限
+        emit('threshold_updated', {'threshold': user['static_threshold']})
+        logger.info(f"静的ランドマーク閾値を更新: {user['static_threshold']}")
+    except (ValueError, TypeError):
+        emit('error', {'message': '無効な閾値です'})
 
 if __name__ == "__main__":
     logger.info("アプリケーション開始")
