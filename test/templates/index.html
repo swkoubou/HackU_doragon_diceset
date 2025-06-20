@@ -40,6 +40,8 @@
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const landmarks = results.multiHandLandmarks[0].map(lm => [lm.x, lm.y, lm.z]);
         console.log("送信するランドマーク:", landmarks.length, "点");
+        console.log("JS landmarks", landmarks)
+
         
         // 修正：正しい形式でデータを送信
         socket.emit("landmark", {
