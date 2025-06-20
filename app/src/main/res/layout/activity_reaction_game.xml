@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@drawable/result_background">
+
+    <!-- ゲームタイトル -->
+    <TextView
+        android:id="@+id/tv_game_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="反射神経テスト"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:layout_marginBottom="32dp"
+        android:gravity="center" />
+
+    <!-- 説明文 -->
+    <TextView
+        android:id="@+id/tv_instruction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="開始ボタンを押すと、1〜3秒後にボタンが表示されます。\nできるだけ早くボタンを押してください！"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:layout_marginBottom="48dp"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp" />
+
+    <!-- ゲーム開始ボタン -->
+    <Button
+        android:id="@+id/btn_start_game"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        android:text="ゲーム開始"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:background="@drawable/button_primary"
+        android:textColor="@color/white"
+        android:layout_marginBottom="32dp" />
+
+    <!-- 反応ボタン（ゲーム中に表示） -->
+    <Button
+        android:id="@+id/btn_reaction"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:text="押せ！"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:background="@drawable/button_record"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        android:layout_marginBottom="32dp" />
+
+    <!-- 結果表示エリア -->
+    <TextView
+        android:id="@+id/tv_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="結果"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:layout_marginBottom="24dp"
+        android:visibility="gone" />
+
+    <!-- 反応時間表示 -->
+    <TextView
+        android:id="@+id/tv_reaction_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="反応時間: 0.000秒"
+        android:textSize="22sp"
+        android:textColor="@color/white"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone" />
+
+    <!-- ベストタイム表示 -->
+    <TextView
+        android:id="@+id/tv_best_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ベストタイム: 0.000秒"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
+
+    <!-- 平均タイム表示 -->
+    <TextView
+        android:id="@+id/tv_average_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="平均タイム: 0.000秒"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:layout_marginBottom="32dp"
+        android:visibility="gone" />
+
+    <!-- 再プレイボタン -->
+    <Button
+        android:id="@+id/btn_play_again"
+        android:layout_width="180dp"
+        android:layout_height="60dp"
+        android:text="もう一度プレイ"
+        android:textSize="16sp"
+        android:background="@drawable/button_secondary"
+        android:textColor="@color/white"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone" />
+
+    <!-- メニューに戻るボタン -->
+    <Button
+        android:id="@+id/btn_back_to_menu"
+        android:layout_width="180dp"
+        android:layout_height="60dp"
+        android:text="メニューに戻る"
+        android:textSize="16sp"
+        android:background="@drawable/button_secondary"
+        android:textColor="@color/white"
+        android:visibility="gone" />
+
+</LinearLayout>

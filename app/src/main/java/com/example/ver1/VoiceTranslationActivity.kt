@@ -134,6 +134,15 @@ class VoiceTranslationActivity : AppCompatActivity() {
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!matches.isNullOrEmpty()) {
                     val recognizedText = matches[0]
+
+                    // 「テスト」が認識された場合、反射神経ゲームを起動
+                    if (recognizedText == "テスト") {
+                        val intent = Intent(this@VoiceTranslationActivity, ReactionGameActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                        return
+                    }
+
                     resultText.text = "認識結果:\n$recognizedText\n\n翻訳中..."
                     // 翻訳開始
                     translateText(recognizedText, "ja", "en")

@@ -59,6 +59,11 @@
             android:name=".VoiceTranslationActivity"
             android:exported="false" />
 
+        <!-- 反射神経ゲームアクティビティ -->
+        <activity
+            android:name=".ReactionGameActivity"
+            android:exported="false" />
+
 
         <!-- ★ provider は 1 つだけで OK ★ -->
         <provider
