@@ -14,6 +14,14 @@
 
 
 
+    <!-- 権限追加 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- 音声録音に必要 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- 外部ストレージへの書き込み -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+
 
     <!-- アプリはカメラが無くても動く（required="false"） -->
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
@@ -23,7 +31,7 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/voice_tranlate"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
