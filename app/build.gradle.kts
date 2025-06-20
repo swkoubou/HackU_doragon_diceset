@@ -52,6 +52,24 @@ dependencies {
     implementation ("com.google.android.material:material:1.11.0")
     implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
 
+    //ML Kitの依存関係
+    implementation ("com.google.mlkit:translate:17.0.1")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
+
+    // Kotlin Coroutines (Android用)
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // Coroutines for Google Play Services (Taskをawaitで待つ用)
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
+
+    // ML Kit 翻訳ライブラリ
+    implementation ("com.google.mlkit:translate:16.1.3")
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
+    implementation ("com.google.mlkit:translate:16.1.3")
+
+
     // コルーチン
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
@@ -78,4 +96,10 @@ dependencies {
     implementation("io.socket:socket.io-client:2.0.1") {
         exclude(group = "org.json", module = "json")
     }
+
+    // ML Kit Translation
+    implementation ("com.google.mlkit:translate:17.0.3")
+
+    // Kotlin Coroutines Play Services integration for await()
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 }

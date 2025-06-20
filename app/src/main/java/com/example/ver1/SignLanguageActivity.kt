@@ -6,6 +6,7 @@ import android.graphics.*
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
@@ -23,11 +24,29 @@ class SignLanguageActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignLanguageBinding
     private lateinit var handLandmarker: HandLandmarker
     private var isFrontCamera = true // 追加部分：カメラが前面か背面かを記録
+    private lateinit var socketClient: LandmarkSocketIOClient
+    private val serverUrl = "https://ryuichi.tail93a4a4.ts.net/"
+    private var lastSentTime = 0L
+    private val sendInterval = 500L // 500ms間隔で送信
+    private var isRecording = false // 録画状態管理
+    private var imageAnalysis: ImageAnalysis? = null // ImageAnalysisの参照を保持
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySignLanguageBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Socket.IOクライアントの初期化
+        initializeSocketClient()
+
+        // 録画制御ボタンの設定
+        binding.btnStartRecording.setOnClickListener {
+            startRecording()
+        }
+
+        binding.btnStopRecording.setOnClickListener {
+            stopRecording()
+        }
 
         // 追加部分：カメラ切り替えボタンの動作を設定
         binding.switchCameraButton.setOnClickListener {
@@ -41,6 +60,19 @@ class SignLanguageActivity : AppCompatActivity() {
         } else {
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
+
+        // 初期状態は録画停止
+        updateRecordingUI(false)
+    }
+
+    private fun initializeSocketClient() {
+        socketClient = LandmarkSocketIOClient(serverUrl) { translationResult ->
+            // メインスレッドで UI を更新
+            runOnUiThread {
+                showTranslationResult(translationResult)
+            }
+        }
+        socketClient.connect()
     }
 
     private fun setupHandLandmarker() {
@@ -60,7 +92,10 @@ class SignLanguageActivity : AppCompatActivity() {
                         })
                     }
                     // 追加部分：Overlay に結果を渡す
-                    binding.overlay.setResults(result) // 追加部分
+                    binding.overlay.setResults(result)
+
+                    // ランドマークデータをサーバーに送信
+                    sendLandmarksToServer(result)
                 }
             }
             .build()
@@ -77,12 +112,15 @@ class SignLanguageActivity : AppCompatActivity() {
                 it.setSurfaceProvider(binding.previewView.surfaceProvider)
             }
 
-            val imageAnalysis = ImageAnalysis.Builder().build().also {
+            imageAnalysis = ImageAnalysis.Builder().build().also {
                 it.setAnalyzer(ContextCompat.getMainExecutor(this)) { imageProxy ->
                     try {
-                        val bitmap = imageProxyToBitmap(imageProxy, isFrontCamera) // 追加部分：isFrontCamera対応
-                        val mpImage = BitmapImageBuilder(bitmap).build()
-                        handLandmarker.detectAsync(mpImage, SystemClock.uptimeMillis())
+                        // 録画中の場合のみ処理
+                        if (isRecording) {
+                            val bitmap = imageProxyToBitmap(imageProxy, isFrontCamera) // 追加部分：isFrontCamera対応
+                            val mpImage = BitmapImageBuilder(bitmap).build()
+                            handLandmarker.detectAsync(mpImage, SystemClock.uptimeMillis())
+                        }
                     } catch (e: Exception) {
                         Log.e("CameraAnalyzer", "Error processing image", e)
                     } finally {
@@ -93,7 +131,7 @@ class SignLanguageActivity : AppCompatActivity() {
 
             val cameraSelector = if (isFrontCamera) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA // 追加部分：カメラ切り替え対応
             cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
+            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis!!)
         }, ContextCompat.getMainExecutor(this))
     }
 
@@ -112,11 +150,15 @@ class SignLanguageActivity : AppCompatActivity() {
             Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show()
             finish()
         }
+        updateRecordingUI(false)
     }
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
+        )
     }
 
     @OptIn(ExperimentalGetImage::class)
@@ -151,5 +193,83 @@ class SignLanguageActivity : AppCompatActivity() {
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 
         return bitmap
+    }
+
+    private fun sendLandmarksToServer(result: com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastSentTime < sendInterval) return
+        lastSentTime = currentTime
+
+        if (result.landmarks().isEmpty()) return
+
+        // 最初の手のランドマークを取得（21点）
+        val handLandmarks = result.landmarks()[0]
+        if (handLandmarks.size != 21) return
+
+        // ローディング表示
+        showLoading(true)
+
+        val landmarks = handLandmarks.map { landmark ->
+            Landmark(landmark.x(), landmark.y(), landmark.z())
+        }
+
+        try {
+            socketClient.sendLandmarks(landmarks)
+        } catch (e: Exception) {
+            Log.e("SocketError", "Failed to send landmarks", e)
+            showError("送信エラー: ${e.message}")
+        }
+    }
+
+    private fun showLoading(show: Boolean) {
+        binding.loadingIndicator.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    private fun showTranslationResult(text: String) {
+        binding.translationResult.text = text
+        showLoading(false)
+
+        // 結果をToastでも表示
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showError(message: String) {
+        showLoading(false)
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun startRecording() {
+        isRecording = true
+        updateRecordingUI(true)
+        binding.translationResult.text = "手話録画中..."
+        Toast.makeText(this, "手話の録画を開始しました", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun stopRecording() {
+        isRecording = false
+        updateRecordingUI(false)
+        binding.translationResult.text = "録画を停止しました"
+        Toast.makeText(this, "手話の録画を停止しました", Toast.LENGTH_SHORT).show()
+
+        // オーバーレイをクリア
+        binding.overlay.setResults(null)
+        showLoading(false)
+    }
+
+    private fun updateRecordingUI(recording: Boolean) {
+        if (recording) {
+            binding.btnStartRecording.visibility = View.GONE
+            binding.btnStopRecording.visibility = View.VISIBLE
+        } else {
+            binding.btnStartRecording.visibility = View.VISIBLE
+            binding.btnStopRecording.visibility = View.GONE
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::socketClient.isInitialized) {
+            socketClient.disconnect()
+        }
     }
 }
