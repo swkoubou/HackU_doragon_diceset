@@ -1,6 +1,5 @@
 package com.example.ver1
 
-
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -20,6 +19,7 @@ class MainActivity : AppCompatActivity() {
         // UI要素を取得
         val signLanguageButton = findViewById<Button>(R.id.btn_sign_language)
         val voiceTranslationButton = findViewById<Button>(R.id.btn_voice_translation)
+        val testGameButton = findViewById<Button>(R.id.btn_test_game)
 
         // 手話翻訳ボタンのクリックリスナー
         signLanguageButton.setOnClickListener {
@@ -28,10 +28,17 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // 音声翻訳ボタンのクリックリスナー（今後実装予定）
+        // 音声翻訳ボタンのクリックリスナー
         voiceTranslationButton.setOnClickListener {
             soundManager.playButtonClick50()
             val intent = Intent(this,VoiceTranslationActivity::class.java)
+            startActivity(intent)
+        }
+
+        // テスト用ゲーム開始ボタンのクリックリスナー
+        testGameButton.setOnClickListener {
+            soundManager.playButtonClick50()
+            val intent = Intent(this, ReactionGameActivity::class.java)
             startActivity(intent)
         }
     }

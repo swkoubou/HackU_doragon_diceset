@@ -56,17 +56,50 @@
         android:visibility="gone"
         android:layout_marginBottom="32dp" />
 
-    <!-- 結果表示エリア -->
-    <TextView
-        android:id="@+id/tv_result"
+    <!-- シンプルな結果表示 -->
+    <LinearLayout
+        android:id="@+id/result_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="結果"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@color/white"
-        android:layout_marginBottom="24dp"
-        android:visibility="gone" />
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        android:background="@color/primary_text"
+        android:padding="32dp"
+        android:layout_marginTop="50dp">
+
+        <!-- 結果タイトル -->
+        <TextView
+            android:id="@+id/tv_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="結果"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 反応時間表示 -->
+        <TextView
+            android:id="@+id/tv_reaction_time_in_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.000秒"
+            android:textSize="28sp"
+            android:textColor="@color/white"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ×ボタン -->
+        <Button
+            android:id="@+id/btn_close_result"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:text="閉じる"
+            android:textSize="16sp"
+            android:textColor="@color/white"
+            android:background="@drawable/button_secondary" />
+
+    </LinearLayout>
 
     <!-- 反応時間表示 -->
     <TextView

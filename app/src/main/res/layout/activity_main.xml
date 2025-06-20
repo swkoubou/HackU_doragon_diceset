@@ -60,31 +60,20 @@
         android:textStyle="bold"
         android:background="@drawable/button_secondary"
         android:textColor="@color/white"
+        android:layout_marginBottom="24dp"
         android:elevation="4dp" />
 
-    <Spinner
-        android:id="@+id/spinner_language"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:spinnerMode="dropdown"
-        />
-
+    <!-- テスト用ゲーム開始ボタン -->
     <Button
-        android:id="@+id/btn_speak_result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="読み上げ"
-        android:layout_margin="16dp"
-        />
-
-    <Button
-        android:id="@+id/btn_reset"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="リセット"
-        android:layout_margin="16dp"
-        />
+        android:id="@+id/btn_test_game"
+        android:layout_width="250dp"
+        android:layout_height="80dp"
+        android:text="反射神経ゲーム（テスト）"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:background="@drawable/button_voice_record"
+        android:textColor="@color/white"
+        android:elevation="4dp" />
 
 
 
