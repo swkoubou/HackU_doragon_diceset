@@ -52,8 +52,8 @@
     <!-- 翻訳アプリ用カラー（白・緑基調） -->
     <color name="translate_background">#FFFFFF</color>
     <color name="translate_surface">#F0FDF4</color>
-    <color name="translate_primary">#10B981</color>
-    <color name="translate_primary_dark">#059669</color>
+    <color name="translate_primary">#4ADE80</color>
+    <color name="translate_primary_dark">#22C55E</color>
     <color name="translate_primary_light">#6EE7B7</color>
     <color name="translate_secondary">#34D399</color>
     <color name="translate_accent">#047857</color>

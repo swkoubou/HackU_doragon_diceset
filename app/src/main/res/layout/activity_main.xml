@@ -2,20 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@color/translate_background"
     android:gravity="center"
-    android:padding="32dp"
-    android:background="@color/translate_background">
+    android:orientation="vertical"
+    android:padding="32dp">
 
     <!-- アプリタイトル -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="48dp"
         android:text="しゅわりん？"
-        android:textSize="28sp"
-        android:textStyle="bold"
         android:textColor="@color/translate_text"
-        android:layout_marginBottom="48dp" />
+        android:textSize="28sp"
+        android:textStyle="bold" />
 
 
     <!-- 説明テキスト -->
@@ -32,39 +32,36 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
         android:text="翻訳方法を選択してください"
-        android:textSize="18sp"
         android:textColor="@color/translate_text_light"
-        android:layout_marginBottom="32dp" />
+        android:textSize="18sp" />
 
     <!-- 手話翻訳ボタン -->
     <Button
         android:id="@+id/btn_sign_language"
         android:layout_width="250dp"
         android:layout_height="80dp"
-        android:text="手話翻訳"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:background="@drawable/button_translate_primary"
-        android:textColor="@color/translate_button_text"
         android:layout_marginBottom="24dp"
-        android:elevation="4dp" />
+        android:background="@drawable/button_translate_primary"
+        android:elevation="4dp"
+        android:text="手話翻訳"
+        android:textColor="@color/translate_button_text"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <!-- 音声翻訳ボタン -->
     <Button
         android:id="@+id/btn_voice_translation"
         android:layout_width="250dp"
         android:layout_height="80dp"
-        android:text="音声翻訳"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:background="@drawable/button_translate_secondary"
-        android:textColor="@color/translate_button_text"
         android:layout_marginBottom="24dp"
-        android:elevation="4dp" />
-
-
-
+        android:background="@drawable/button_translate_secondary"
+        android:elevation="4dp"
+        android:text="音声翻訳"
+        android:textColor="@color/translate_button_text"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
 
 </LinearLayout>
