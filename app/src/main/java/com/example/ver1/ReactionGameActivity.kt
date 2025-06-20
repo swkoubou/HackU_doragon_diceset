@@ -13,6 +13,7 @@ import kotlin.random.Random
 
 class ReactionGameActivity : AppCompatActivity() {
 
+    private lateinit var soundManager: SoundManager
     private lateinit var titleText: TextView
     private lateinit var instructionText: TextView
     private lateinit var startButton: Button
@@ -42,6 +43,9 @@ class ReactionGameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reaction_game)
 
+        // SoundManager初期化
+        soundManager = SoundManager.getInstance(this)
+
         initViews()
         initSharedPreferences()
         setupClickListeners()
@@ -67,20 +71,24 @@ class ReactionGameActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         startButton.setOnClickListener {
+            soundManager.playSuccessSound() // ゲーム開始ボタンは成功音
             startGame()
         }
 
         reactionButton.setOnClickListener {
             if (waitingForReaction) {
+                soundManager.playButtonClick40() // ゲーム内ボタンは40
                 handleReaction()
             }
         }
 
         playAgainButton.setOnClickListener {
+            soundManager.playButtonClick40() // ゲーム内ボタンは40
             showStartScreen()
         }
 
         backToMenuButton.setOnClickListener {
+            soundManager.playButtonClick40() // ゲーム内ボタンは40
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
@@ -154,7 +162,7 @@ class ReactionGameActivity : AppCompatActivity() {
         editor.putLong(KEY_TOTAL_TIME, totalTime + reactionTime)
         editor.putInt(KEY_GAME_COUNT, gameCount + 1)
 
-        editor.apply()
+        editor.commit() // 同期処理で即座に保存
     }
 
     private fun showResults(reactionTime: Long) {
