@@ -31,6 +31,37 @@
     <color name="background_color">#FAFAFA</color>
     <color name="surface_color">#FFFFFF</color>
 
+    <!-- ダークテーマ用色 -->
+    <color name="dark_background">#121212</color>
+    <color name="dark_surface">#1E1E1E</color>
+    <color name="dark_card">#2D2D2D</color>
+    <color name="dark_primary">#BB86FC</color>
+    <color name="dark_accent">#03DAC6</color>
+
+    <!-- ゲーム用カラー -->
+    <color name="game_background">#0D1117</color>
+    <color name="game_surface">#161B22</color>
+    <color name="game_accent">#7C3AED</color>
+    <color name="game_accent_light">#A855F7</color>
+    <color name="game_success">#10B981</color>
+    <color name="game_warning">#F59E0B</color>
+    <color name="game_text">#F8FAFC</color>
+    <color name="game_text_muted">#94A3B8</color>
+    <color name="game_border">#374151</color>
+
+    <!-- 翻訳アプリ用カラー（白・緑基調） -->
+    <color name="translate_background">#FFFFFF</color>
+    <color name="translate_surface">#F8FDF8</color>
+    <color name="translate_primary">#22C55E</color>
+    <color name="translate_primary_dark">#16A34A</color>
+    <color name="translate_primary_light">#86EFAC</color>
+    <color name="translate_secondary">#10B981</color>
+    <color name="translate_accent">#059669</color>
+    <color name="translate_text">#1F2937</color>
+    <color name="translate_text_light">#6B7280</color>
+    <color name="translate_border">#D1FAE5</color>
+    <color name="translate_card">#F0FDF4</color>
+
     <!-- その他 -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>

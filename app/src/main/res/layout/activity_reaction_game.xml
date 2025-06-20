@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="24dp"
-    android:background="@drawable/result_background">
+    android:background="@color/game_background">
 
     <!-- ゲームタイトル -->
     <TextView
@@ -15,7 +15,7 @@
         android:text="反射神経テスト"
         android:textSize="32sp"
         android:textStyle="bold"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="32dp"
         android:gravity="center" />
 
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:text="開始ボタンを押すと、1〜3秒後にボタンが表示されます。\nできるだけ早くボタンを押してください！"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="48dp"
         android:gravity="center"
         android:lineSpacingExtra="4dp" />
@@ -39,8 +39,8 @@
         android:text="ゲーム開始"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:background="@drawable/button_primary"
-        android:textColor="@color/white"
+        android:background="@drawable/button_game_primary"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="32dp" />
 
     <!-- 反応ボタン（ゲーム中に表示） -->
@@ -51,8 +51,8 @@
         android:text="押せ！"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:background="@drawable/button_record"
-        android:textColor="@color/white"
+        android:background="@drawable/button_game_reaction"
+        android:textColor="@color/game_text"
         android:visibility="gone"
         android:layout_marginBottom="32dp" />
 
@@ -64,7 +64,7 @@
         android:orientation="vertical"
         android:gravity="center"
         android:visibility="gone"
-        android:background="@color/primary_text"
+        android:background="@drawable/result_card_background"
         android:padding="32dp"
         android:layout_marginTop="50dp">
 
@@ -76,7 +76,7 @@
             android:text="結果"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@color/white"
+            android:textColor="@color/game_text"
             android:layout_marginBottom="16dp" />
 
         <!-- 反応時間表示 -->
@@ -86,7 +86,7 @@
             android:layout_height="wrap_content"
             android:text="0.000秒"
             android:textSize="28sp"
-            android:textColor="@color/white"
+            android:textColor="@color/game_text"
             android:layout_marginBottom="24dp" />
 
         <!-- ×ボタン -->
@@ -96,8 +96,8 @@
             android:layout_height="50dp"
             android:text="閉じる"
             android:textSize="16sp"
-            android:textColor="@color/white"
-            android:background="@drawable/button_secondary" />
+            android:textColor="@color/game_text"
+            android:background="@drawable/button_game_secondary" />
 
     </LinearLayout>
 
@@ -108,7 +108,7 @@
         android:layout_height="wrap_content"
         android:text="反応時間: 0.000秒"
         android:textSize="22sp"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="16dp"
         android:visibility="gone" />
 
@@ -119,7 +119,7 @@
         android:layout_height="wrap_content"
         android:text="ベストタイム: 0.000秒"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="8dp"
         android:visibility="gone" />
 
@@ -130,7 +130,7 @@
         android:layout_height="wrap_content"
         android:text="平均タイム: 0.000秒"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="32dp"
         android:visibility="gone" />
 
@@ -142,7 +142,7 @@
         android:text="もう一度プレイ"
         android:textSize="16sp"
         android:background="@drawable/button_secondary"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="16dp"
         android:visibility="gone" />
 
@@ -154,7 +154,7 @@
         android:text="メニューに戻る"
         android:textSize="16sp"
         android:background="@drawable/button_secondary"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:visibility="gone" />
 
 </LinearLayout>

@@ -120,7 +120,7 @@ class ReactionGameActivity : AppCompatActivity() {
         backToMenuButton.visibility = View.GONE
 
         titleText.text = "反射神経テスト"
-        instructionText.text = "開始ボタンを押すと、1〜3秒後にボタンが表示されます。\nできるだけ早くボタンを押してください！"
+        instructionText.text = "開始ボタンを押すと、1〜7秒後にボタンが表示されます。\nできるだけ早くボタンを押してください！"
         waitingForReaction = false
     }
 
@@ -133,7 +133,7 @@ class ReactionGameActivity : AppCompatActivity() {
         resultText.text = "待機中..."
 
         gameStartTime = System.currentTimeMillis()
-        val randomDelay = Random.nextLong(1000, 3001) // 1秒〜3秒
+        val randomDelay = Random.nextLong(1000, 7001) // 1秒〜7秒
 
         handler.postDelayed({
             showReactionButton()
@@ -203,6 +203,10 @@ class ReactionGameActivity : AppCompatActivity() {
         val timeText = "${String.format("%.3f", reactionTimeSeconds)}秒"
         reactionTimeInResult.text = timeText
         Log.d("ReactionGame", "Result text set to: $timeText")
+
+        // 結果に応じた効果音を再生
+        soundManager.playResultSound(reactionTime)
+        Log.d("ReactionGame", "Playing result sound for time: $reactionTime ms")
     }
 
     override fun onBackPressed() {
