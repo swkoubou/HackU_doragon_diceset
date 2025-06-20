@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="48dp"
-        android:text="しゅわりん？"
+        android:text="しゅわりん"
         android:textColor="@color/translate_text"
         android:textSize="28sp"
         android:textStyle="bold" />
@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:text="翻訳方法を選択してください"
+        android:text="翻訳方法を選択してね"
         android:textColor="@color/translate_text_light"
         android:textSize="18sp" />
 
@@ -45,7 +45,7 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/button_translate_primary"
         android:elevation="4dp"
-        android:text="手話翻訳"
+        android:text="手話の翻訳"
         android:textColor="@color/translate_button_text"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -58,7 +58,7 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/button_translate_secondary"
         android:elevation="4dp"
-        android:text="音声翻訳"
+        android:text="音声入力"
         android:textColor="@color/translate_button_text"
         android:textSize="18sp"
         android:textStyle="bold" />
