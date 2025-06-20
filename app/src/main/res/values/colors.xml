@@ -51,16 +51,18 @@
 
     <!-- 翻訳アプリ用カラー（白・緑基調） -->
     <color name="translate_background">#FFFFFF</color>
-    <color name="translate_surface">#F8FDF8</color>
-    <color name="translate_primary">#22C55E</color>
-    <color name="translate_primary_dark">#16A34A</color>
-    <color name="translate_primary_light">#86EFAC</color>
-    <color name="translate_secondary">#10B981</color>
-    <color name="translate_accent">#059669</color>
+    <color name="translate_surface">#F0FDF4</color>
+    <color name="translate_primary">#10B981</color>
+    <color name="translate_primary_dark">#059669</color>
+    <color name="translate_primary_light">#6EE7B7</color>
+    <color name="translate_secondary">#34D399</color>
+    <color name="translate_accent">#047857</color>
     <color name="translate_text">#1F2937</color>
     <color name="translate_text_light">#6B7280</color>
     <color name="translate_border">#D1FAE5</color>
     <color name="translate_card">#F0FDF4</color>
+    <color name="translate_button_text">#FFFFFF</color>
+    <color name="translate_overlay">#80000000</color>
 
     <!-- その他 -->
     <color name="white">#FFFFFF</color>
