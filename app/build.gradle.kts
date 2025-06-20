@@ -78,4 +78,10 @@ dependencies {
     implementation("io.socket:socket.io-client:2.0.1") {
         exclude(group = "org.json", module = "json")
     }
+
+    // ML Kit Translation
+    implementation ("com.google.mlkit:translate:17.0.3")
+
+    // Kotlin Coroutines Play Services integration for await()
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 }
