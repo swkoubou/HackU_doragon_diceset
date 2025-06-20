@@ -160,12 +160,16 @@ def index():
 def handle_landmark(data):
     sid = request.sid
     user = user_data[sid]
+    landmark_data = None  # 先に初期化
+
     if isinstance(data, list) and data:
         landmark_data = data
     elif isinstance(data, dict) and 'landmarks' in data:
-        # JSON → ndarray (21, 3)
         try:
-            landmark_data = np.array([[lm['x'], lm['y'], lm['z']] for lm in data['landmarks']])
+            landmarks = data["landmarks"]
+            # 送られてきたlandmarksの形式に合わせて処理（ここではそのまま代入）
+            landmark_data = landmarks
+            # もし座標抽出など加工が必要ならここで行う
         except Exception as e:
             logger.error(f"ランドマーク変換エラー: {e}")
             user['error_counter'] += 1
@@ -173,10 +177,14 @@ def handle_landmark(data):
     else:
         user['error_counter'] += 1
         return
-    user['frame_buffer'].append(landmark_data)
-    user['frame_counter'] += 1
-    #rint("ランドマークデータ:", np.array(user['frame_buffer']).shape)
-    print(landmark_data)
+
+    if landmark_data is not None:
+        user['frame_buffer'].append(landmark_data)
+        user['frame_counter'] += 1
+       #print(landmark_data)
+    else:
+        user['error_counter'] += 1
+
 
 
     if user['frame_counter'] % 5 == 0 and recognizer.model_loaded:
