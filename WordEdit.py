@@ -4,10 +4,16 @@ import time
 genai.configure(api_key="AIzaSyDOKdOG61JLozonIWPBx1cZfGXaNvNWA78")
 # ② モデルの準備（Gemini-Pro使用）
 model = genai.GenerativeModel("models/gemini-2.5-pro")
+#model = genai.GenerativeModel("models/gemini-2.5-flash")
 def wordEdit(input_text):
     prompt = f"""
     以下の壊れた日本語の文字列を、意味が通じる自然な日本語に修正してください。
     文字の繰り返しや発音の揺れを含んでいても、文脈をもとに本来伝えたい日本語に変換してください。
+    以下間違いやすい文字です。
+    あ、や
+    う、ひ
+    い、ち
+    に、み
     入力: {input_text}
     修正後の自然な日本語を1つだけ出力してください。
     """
