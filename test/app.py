@@ -9,6 +9,7 @@ from tensorflow import keras
 import os
 import logging
 import time
+import google.generativeai as genai
 
 # ログ設定
 logging.basicConfig(
@@ -216,13 +217,38 @@ def handle_landmark(data):
             user['prediction_history'].clear()
         user['error_counter'] = 0
 
+# Gemini APIキーをセット（環境変数や安全な方法で管理推奨）
+genai.configure(api_key="AIzaSyDOKdOG61JLozonIWPBx1cZfGXaNvNWA78")
+
+# Geminiモデルの準備（Gemini-Proなど）
+model = genai.GenerativeModel("models/gemini-2.5-flash")
+
+def wordEdit(input_text):
+    prompt = f"""
+    以下の壊れた日本語の文字列を、意味が通じる自然な日本語に修正してください。
+    文字の繰り返しや発音の揺れを含んでいても、文脈をもとに本来伝えたい日本語に変換してください。
+    以下間違いやすい文字です。
+    あ、や
+    う、ひ
+    い、ち
+    に、み
+    入力: {input_text}
+    修正後の自然な日本語を1つだけ出力してください。
+    """
+    response = model.generate_content(prompt)
+    return response.text.strip()
+
+
 def refine_text_with_ai(raw_text):
     try:
-        return f"【整形済み】{raw_text.replace(' ', '')}"
+        # Gemini APIを呼んで整形する
+        print("AI開始")
+        refined = wordEdit(raw_text)
+        logger.info(f"AI整形結果: {refined}")
+        return refined
     except Exception as e:
         logger.error(f"整形エラー: {e}")
         return raw_text
-
 @socketio.on('disconnect')
 def handle_disconnect():
     sid = request.sid
