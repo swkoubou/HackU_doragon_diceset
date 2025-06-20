@@ -162,6 +162,8 @@ def handle_landmark(data):
     sid = request.sid
     user = user_data[sid]
     landmark_data = None  # 先に初期化
+   #print(f"Received data type: {type(data)}, data: {data}")
+    print(user['error_counter'])
 
     if isinstance(data, list) and data:
         landmark_data = data
