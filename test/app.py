@@ -11,6 +11,10 @@ import os
 import logging
 import time
 import math
+import google.generativeai as genai
+
+genai.configure(api_key="AIzaSyDOKdOG61JLozonIWPBx1cZfGXaNvNWA78")
+model = genai.GenerativeModel("models/gemini-1.5-pro")
 
 # ログ設定
 logging.basicConfig(
@@ -33,6 +37,34 @@ user_data = defaultdict(lambda: {
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+def wordEdit(input_text):
+    prompt = f"""
+以下の壊れた日本語の文字列を、意味が通じる自然な日本語に修正してください。
+文字の繰り返しや発音の揺れを含んでいても、文脈をもとに本来伝えたい日本語に変換してください。
+以下間違いやすい文字です：
+- あ ↔ や
+- う ↔ ひ
+- い ↔ ち
+- に ↔ み
+
+入力: {input_text}
+修正後の自然な日本語を1つだけ出力してください。
+"""
+    try:
+        response = model.generate_content(prompt)
+        # 最新のGemini APIではこう書くのが安全
+        if hasattr(response, 'text') and response.text.strip():
+            return response.text.strip()
+        elif hasattr(response, 'parts'):
+            return response.parts[0].text.strip()
+        else:
+            logger.warning("Gemini返答が空です")
+            return input_text
+    except Exception as e:
+        logger.error(f"Gemini整形エラー: {e}")
+        return input_text
+
 
 class DynamicMotionDetector:
     """Stage 1: 動的判定（ルールベース）"""
@@ -164,15 +196,6 @@ class HiraganaRecognizer:
         return frames
     
     def predict(self, frames):
-        """ひらがな文字を予測"""
-        if not self.model_loaded:
-            # デモ用のダミー予測
-            demo_chars = ["あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ", "さ", "し", "す", "せ", "そ"]
-            import random
-            char = random.choice(demo_chars)
-            confidence = random.uniform(0.6, 0.9)
-            return char, confidence
-        
         try:
             normalized_data = self.normalize_sequence(frames)
             input_data = normalized_data.reshape(1, normalized_data.shape[0], -1)
@@ -346,39 +369,37 @@ class ThreeStageRecognizer:
         return base_char
     
     def predict(self, frame_buffer):
-        """3段階認識を実行"""
         if len(frame_buffer) < 10:
             return None, 0.0, "フレーム数不足"
-        
+
         frames_list = list(frame_buffer)
-        
-        # Stage 1: 動的判定
-        is_dynamic, motion_confidence, motion_reason = self.motion_detector.is_dynamic_sign(frames_list)
-        
-        if not is_dynamic:
-            return None, motion_confidence, f"静的判定: {motion_reason}"
-        
-        # Stage 2: ひらがな基本文字認識
+
+        # Step 1: まず文字を認識
         base_char, hiragana_confidence = self.hiragana_recognizer.predict(frames_list)
-        
+
         if not base_char or hiragana_confidence < 0.3:
             return None, hiragana_confidence, "ひらがな認識失敗"
-        
-        # Stage 3: 特殊記号認識
-        symbol, symbol_confidence = self.symbol_recognizer.predict(frames_list, base_char)
-        
-        # 最終結果の統合
-        if symbol and symbol_confidence > 0.4:
-            final_char = self.apply_symbol_transformation(base_char, symbol)
-            # 統合信頼度（各段階の信頼度を掛け合わせ）
-            total_confidence = motion_confidence * hiragana_confidence * symbol_confidence
-            result_info = f"基本文字: {base_char}, 記号: {symbol}"
-        else:
-            final_char = base_char
-            total_confidence = motion_confidence * hiragana_confidence
-            result_info = f"基本文字のみ: {base_char}"
-        
+
+        # Step 2: 動的かどうか判定（濁点などが必要か判別）
+        is_dynamic, motion_confidence, motion_reason = self.motion_detector.is_dynamic_sign(frames_list)
+
+        final_char = base_char
+        total_confidence = hiragana_confidence  # 初期は基本文字のみの信頼度
+        result_info = f"基本文字のみ: {base_char}"
+
+        if is_dynamic:
+            # Step 3: 動的なら記号を付加する
+            symbol, symbol_confidence = self.symbol_recognizer.predict(frames_list, base_char)
+
+            if symbol and symbol_confidence > 0.4:
+                final_char = self.apply_symbol_transformation(base_char, symbol)
+                total_confidence = hiragana_confidence * motion_confidence * symbol_confidence
+                result_info = f"基本文字: {base_char}, 記号: {symbol}"
+            else:
+                total_confidence = hiragana_confidence * motion_confidence
+
         return final_char, total_confidence, result_info
+
 
 # 認識エンジンのインスタンス
 recognizer = ThreeStageRecognizer()
@@ -393,30 +414,62 @@ def handle_landmark(data):
     sid = request.sid
     user = user_data[sid]
     
-    # データ検証とバッファへの追加
-    landmark_data = None
+    # データ検証
+    landmark_data_raw = None
     if isinstance(data, list) and len(data) > 0:
-        landmark_data = data
+        landmark_data_raw = data
     elif isinstance(data, dict) and 'landmarks' in data:
-        landmark_data = data['landmarks']
+        # Androidから送られてくる形式が {"landmarks": [[x,y,z], [x,y,z], ...]} の場合
+        # または {"landmarks": [{"x": x, "y": y, "z": z}, ...]} の場合
+        landmark_data_raw = data['landmarks']
     
-    if landmark_data is not None:
-        user['frame_buffer'].append(landmark_data)
-        user['error_counter'] = 0
+    processed_landmark_frame = []
+    if landmark_data_raw is not None:
+        try:
+            # ランドマークデータがリストのリスト（[[x,y,z],...]）か、
+            # リストの辞書（[{'x':x,'y':y,'z':z},...]）かによって処理を分岐
+            if all(isinstance(lm, list) for lm in landmark_data_raw):
+                # 形式: [[x,y,z], [x,y,z], ...] の場合 (既に数値のリストなのでそのまま)
+                processed_landmark_frame = [list(lm) for lm in landmark_data_raw]
+            elif all(isinstance(lm, dict) and 'x' in lm and 'y' in lm and 'z' in lm for lm in landmark_data_raw):
+                # 形式: [{'x': x, 'y': y, 'z': z}, ...] の場合
+                # 各辞書からx, y, zの値を取り出してリストのリストに変換
+                processed_landmark_frame = [[lm['x'], lm['y'], lm['z']] for lm in landmark_data_raw]
+            else:
+                logger.warning(f"未知のランドマークデータ形式: {landmark_data_raw}")
+                user['error_counter'] += 1
+                return # 処理を中断
+                
+            # 処理されたフレームをバッファに追加
+            if processed_landmark_frame: # 空でないことを確認
+                user['frame_buffer'].append(processed_landmark_frame)
+                user['error_counter'] = 0
+            else:
+                # ランドマークが検出されなかった場合
+                user['error_counter'] += 1
+                logger.debug(f"ランドマークデータが空です (error_counter: {user['error_counter']})")
+
+        except Exception as e:
+            logger.error(f"ランドマークデータ処理エラー: {e}, データ: {landmark_data_raw}")
+            user['error_counter'] += 1
+            return # 処理を中断
     else:
+        # データがNoneの場合（Androidからnullが送られてきた場合など）
         user['error_counter'] += 1
+        logger.debug(f"受信したランドマークデータがNoneです (error_counter: {user['error_counter']})")
     
     user['frame_counter'] += 1
     
-    # 10フレームごとに認識実行
+# app.py の handle_landmark 関数内 (一部抜粋)
     if user['frame_counter'] % 10 == 0:
         current_time = time.time()
-        if current_time - user['last_prediction_time'] > 0.8:  # 0.8秒間隔
+        if current_time - user['last_prediction_time'] > 0.8:
             user['last_prediction_time'] = current_time
             
+            logger.info(f"--- 認識処理開始 (SID: {sid}, フレーム数: {len(user['frame_buffer'])}) ---")
             pred_text, confidence, info = recognizer.predict(user['frame_buffer'])
             
-            if pred_text and confidence > 0.2:  # 閾値を下げる
+            if pred_text and confidence > 0.2: # ここを一時的に低い値に
                 user['prediction_history'].append((pred_text, confidence, info))
                 user['text_buffer'].append(pred_text)
                 
@@ -431,13 +484,13 @@ def handle_landmark(data):
                     'timestamp': time.strftime('%H:%M:%S')
                 })
             else:
-                logger.debug(f"認識失敗: {info} (信頼度: {confidence:.3f})")
+                logger.info(f"認識失敗: {info} (信頼度: {confidence:.3f}), フレーム数: {len(user['frame_buffer'])}") # INFOレベルで詳細出力
     
     # 文章終了判定
     if user['error_counter'] >= 15:
         if user['text_buffer']:
             raw_text = ''.join(user['text_buffer'])  # 日本語なのでスペースなし
-            refined_text = refine_text_with_ai(raw_text)
+            refined_text = wordEdit(raw_text)
             
             emit('result', {
                 'type': 'sentence_complete',
@@ -452,30 +505,6 @@ def handle_landmark(data):
             user['prediction_history'].clear()
         
         user['error_counter'] = 0
-
-def refine_text_with_ai(raw_text):
-    """生成AIで文章を整形（現在はダミー実装）"""
-    try:
-        # 将来的にはここでOpenAI API等を使用
-        processed_text = raw_text.replace('っっ', 'っ')  # 重複削除
-        
-        # 簡単な文脈補正
-        common_corrections = {
-            'おはよ': 'おはよう',
-            'ありがと': 'ありがとう',
-            'こんにち': 'こんにちは',
-            'さよなら': 'さようなら'
-        }
-        
-        for wrong, correct in common_corrections.items():
-            if wrong in processed_text:
-                processed_text = processed_text.replace(wrong, correct)
-        
-        return processed_text
-        
-    except Exception as e:
-        logger.error(f"文章整形エラー: {e}")
-        return raw_text
 
 @socketio.on('connect')
 def handle_connect():
