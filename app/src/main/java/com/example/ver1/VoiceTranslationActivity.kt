@@ -27,6 +27,7 @@ import kotlinx.coroutines.tasks.await
 
 class VoiceTranslationActivity : AppCompatActivity() {
 
+    private lateinit var soundManager: SoundManager
     private lateinit var startRecognitionButton: Button
     private lateinit var stopRecognitionButton: Button
     private lateinit var resultText: TextView
@@ -52,6 +53,9 @@ class VoiceTranslationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_voice_translation)
 
+        // SoundManager初期化
+        soundManager = SoundManager.getInstance(this)
+
         initViews()
         setupClickListeners()
         setupSpeechRecognizer()
@@ -74,18 +78,22 @@ class VoiceTranslationActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         startRecognitionButton.setOnClickListener {
+            soundManager.playButtonClick50()
             checkPermissionAndStartRecognition()
         }
 
         stopRecognitionButton.setOnClickListener {
+            soundManager.playButtonClick50()
             stopSpeechRecognition()
         }
 
         backToMenuButton.setOnClickListener {
+            soundManager.playButtonClick50()
             finish()
         }
 
         retryButton.setOnClickListener {
+            soundManager.playButtonClick50()
             resetScreen()
         }
     }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- 明確に見える濃い緑色 -->
+    <solid android:color="@color/translate_primary" />
+
+    <!-- 角を丸く -->
+    <corners android:radius="16dp" />
+
+    <!-- ボーダー -->
+    <stroke
+        android:width="2dp"
+        android:color="@color/translate_primary_dark" />
+
+</shape>

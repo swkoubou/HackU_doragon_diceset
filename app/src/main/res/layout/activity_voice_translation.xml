@@ -3,17 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    android:background="@color/background_color">
+    android:background="@color/translate_background">
 
     <!-- タイトル -->
     <TextView
         android:id="@+id/tv_voice_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="音声翻訳"
+        android:text="音声入力"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@color/primary_text"
+        android:textColor="@color/translate_text"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
 
@@ -31,11 +31,11 @@
             android:id="@+id/btn_record_voice"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:text="🎤\n録音開始"
+            android:text="🎤\n音声入力開始"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:background="@drawable/button_voice_record"
-            android:textColor="@color/white"
+            android:background="@drawable/button_translate_voice"
+            android:textColor="@color/translate_button_text"
             android:elevation="8dp"
             android:layout_marginBottom="16dp" />
 
@@ -44,11 +44,11 @@
             android:id="@+id/btn_stop_record"
             android:layout_width="200dp"
             android:layout_height="80dp"
-            android:text="⏹ 録音停止"
+            android:text="⏹ 音声入力停止"
             android:textSize="16sp"
             android:textStyle="bold"
             android:background="@drawable/button_stop_record"
-            android:textColor="@color/white"
+            android:textColor="@color/translate_button_text"
             android:elevation="4dp"
             android:layout_marginBottom="24dp"
             android:visibility="gone" />
@@ -67,12 +67,12 @@
             android:id="@+id/tv_voice_result"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="録音ボタンを押して音声を録音してください"
+            android:text="入力ボタンを押して音声入力を開始してください"
             android:textSize="16sp"
-            android:textColor="@color/primary_text"
+            android:textColor="@color/translate_text"
             android:gravity="center"
             android:padding="16dp"
-            android:background="@drawable/result_background"
+            android:background="@drawable/translate_result_background"
             android:minHeight="120dp"
             android:layout_marginBottom="24dp" />
 
@@ -94,10 +94,10 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            android:text="メニューへ"
+            android:text="ホームへ"
             android:textSize="16sp"
-            android:background="@drawable/button_secondary"
-            android:textColor="@color/white"
+            android:background="@drawable/button_translate_secondary"
+            android:textColor="@color/translate_button_text"
             android:layout_marginEnd="8dp"
             android:visibility="gone" />
 
@@ -107,10 +107,10 @@
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
-            android:text="再度録音"
+            android:text="もう一度"
             android:textSize="16sp"
-            android:background="@drawable/button_primary"
-            android:textColor="@color/white"
+            android:background="@drawable/button_translate_primary"
+            android:textColor="@color/translate_button_text"
             android:layout_marginStart="8dp"
             android:visibility="gone" />
 

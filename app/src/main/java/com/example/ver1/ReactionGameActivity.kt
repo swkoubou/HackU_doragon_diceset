@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -13,11 +14,15 @@ import kotlin.random.Random
 
 class ReactionGameActivity : AppCompatActivity() {
 
+    private lateinit var soundManager: SoundManager
     private lateinit var titleText: TextView
     private lateinit var instructionText: TextView
     private lateinit var startButton: Button
     private lateinit var reactionButton: Button
+    private lateinit var resultContainer: View
     private lateinit var resultText: TextView
+    private lateinit var reactionTimeInResult: TextView
+    private lateinit var closeResultButton: Button
     private lateinit var reactionTimeText: TextView
     private lateinit var bestTimeText: TextView
     private lateinit var averageTimeText: TextView
@@ -42,6 +47,9 @@ class ReactionGameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reaction_game)
 
+        // SoundManager初期化
+        soundManager = SoundManager.getInstance(this)
+
         initViews()
         initSharedPreferences()
         setupClickListeners()
@@ -53,7 +61,10 @@ class ReactionGameActivity : AppCompatActivity() {
         instructionText = findViewById(R.id.tv_instruction)
         startButton = findViewById(R.id.btn_start_game)
         reactionButton = findViewById(R.id.btn_reaction)
+        resultContainer = findViewById(R.id.result_container)
         resultText = findViewById(R.id.tv_result)
+        reactionTimeInResult = findViewById(R.id.tv_reaction_time_in_result)
+        closeResultButton = findViewById(R.id.btn_close_result)
         reactionTimeText = findViewById(R.id.tv_reaction_time)
         bestTimeText = findViewById(R.id.tv_best_time)
         averageTimeText = findViewById(R.id.tv_average_time)
@@ -67,23 +78,32 @@ class ReactionGameActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         startButton.setOnClickListener {
+            soundManager.playSuccessSound() // ゲーム開始ボタンは成功音
             startGame()
         }
 
         reactionButton.setOnClickListener {
             if (waitingForReaction) {
+                soundManager.playButtonClick40() // ゲーム内ボタンは40
                 handleReaction()
             }
         }
 
         playAgainButton.setOnClickListener {
+            soundManager.playButtonClick40() // ゲーム内ボタンは40
             showStartScreen()
         }
 
         backToMenuButton.setOnClickListener {
+            soundManager.playButtonClick40() // ゲーム内ボタンは40
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
+        }
+
+        closeResultButton.setOnClickListener {
+            soundManager.playButtonClick40() // ×ボタンも40
+            showStartScreen()
         }
     }
 
@@ -92,7 +112,7 @@ class ReactionGameActivity : AppCompatActivity() {
         instructionText.visibility = View.VISIBLE
         startButton.visibility = View.VISIBLE
         reactionButton.visibility = View.GONE
-        resultText.visibility = View.GONE
+        resultContainer.visibility = View.GONE
         reactionTimeText.visibility = View.GONE
         bestTimeText.visibility = View.GONE
         averageTimeText.visibility = View.GONE
@@ -100,7 +120,7 @@ class ReactionGameActivity : AppCompatActivity() {
         backToMenuButton.visibility = View.GONE
 
         titleText.text = "反射神経テスト"
-        instructionText.text = "開始ボタンを押すと、1〜3秒後にボタンが表示されます。\nできるだけ早くボタンを押してください！"
+        instructionText.text = "開始ボタンを押すと、1〜7秒後にボタンが表示されます。\nできるだけ早くボタンを押してください！"
         waitingForReaction = false
     }
 
@@ -113,7 +133,7 @@ class ReactionGameActivity : AppCompatActivity() {
         resultText.text = "待機中..."
 
         gameStartTime = System.currentTimeMillis()
-        val randomDelay = Random.nextLong(1000, 3001) // 1秒〜3秒
+        val randomDelay = Random.nextLong(1000, 7001) // 1秒〜7秒
 
         handler.postDelayed({
             showReactionButton()
@@ -154,41 +174,39 @@ class ReactionGameActivity : AppCompatActivity() {
         editor.putLong(KEY_TOTAL_TIME, totalTime + reactionTime)
         editor.putInt(KEY_GAME_COUNT, gameCount + 1)
 
-        editor.apply()
+        editor.commit() // 同期処理で即座に保存
     }
 
     private fun showResults(reactionTime: Long) {
-        reactionButton.visibility = View.GONE
-        resultText.text = "結果"
+        Log.d("ReactionGame", "showResults called with time: $reactionTime")
 
-        reactionTimeText.visibility = View.VISIBLE
-        bestTimeText.visibility = View.VISIBLE
-        averageTimeText.visibility = View.VISIBLE
-        playAgainButton.visibility = View.VISIBLE
-        backToMenuButton.visibility = View.VISIBLE
+        reactionButton.visibility = View.GONE
+
+        // 他の要素を非表示
+        titleText.visibility = View.GONE
+        instructionText.visibility = View.GONE
+        reactionTimeText.visibility = View.GONE
+        bestTimeText.visibility = View.GONE
+        averageTimeText.visibility = View.GONE
+        playAgainButton.visibility = View.GONE
+        backToMenuButton.visibility = View.GONE
+
+        // 結果表示テキストも非表示
+        resultText.visibility = View.GONE
+
+        // 結果ウィンドウを表示
+        resultContainer.visibility = View.VISIBLE
+        Log.d("ReactionGame", "resultContainer visibility set to VISIBLE")
 
         // 反応時間表示（小数点以下3桁まで）
         val reactionTimeSeconds = reactionTime / 1000.0
-        reactionTimeText.text = "反応時間: ${String.format("%.3f", reactionTimeSeconds)}秒"
+        val timeText = "${String.format("%.3f", reactionTimeSeconds)}秒"
+        reactionTimeInResult.text = timeText
+        Log.d("ReactionGame", "Result text set to: $timeText")
 
-        // ベストタイム表示
-        val bestTime = sharedPreferences.getLong(KEY_BEST_TIME, Long.MAX_VALUE)
-        if (bestTime != Long.MAX_VALUE) {
-            val bestTimeSeconds = bestTime / 1000.0
-            bestTimeText.text = "ベストタイム: ${String.format("%.3f", bestTimeSeconds)}秒"
-        } else {
-            bestTimeText.text = "ベストタイム: --"
-        }
-
-        // 平均タイム表示
-        val totalTime = sharedPreferences.getLong(KEY_TOTAL_TIME, 0)
-        val gameCount = sharedPreferences.getInt(KEY_GAME_COUNT, 0)
-        if (gameCount > 0) {
-            val averageTime = totalTime.toDouble() / gameCount / 1000.0
-            averageTimeText.text = "平均タイム: ${String.format("%.3f", averageTime)}秒 (${gameCount}回プレイ)"
-        } else {
-            averageTimeText.text = "平均タイム: --"
-        }
+        // 結果に応じた効果音を再生
+        soundManager.playResultSound(reactionTime)
+        Log.d("ReactionGame", "Playing result sound for time: $reactionTime ms")
     }
 
     override fun onBackPressed() {

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- グラデーション背景 -->
+    <gradient
+        android:startColor="@color/translate_primary"
+        android:endColor="@color/translate_accent"
+        android:angle="135" />
+
+    <!-- ボーダー -->
+    <stroke
+        android:width="3dp"
+        android:color="@color/translate_primary_light" />
+
+</shape>

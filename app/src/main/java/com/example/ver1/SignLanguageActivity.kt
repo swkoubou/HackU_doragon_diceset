@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream
 
 class SignLanguageActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignLanguageBinding
+    private lateinit var soundManager: SoundManager
     private lateinit var handLandmarker: HandLandmarker
     private var isFrontCamera = true // 追加部分：カメラが前面か背面かを記録
     private lateinit var socketClient: LandmarkSocketIOClient
@@ -36,20 +37,26 @@ class SignLanguageActivity : AppCompatActivity() {
         binding = ActivitySignLanguageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // SoundManager初期化
+        soundManager = SoundManager.getInstance(this)
+
         // Socket.IOクライアントの初期化
         initializeSocketClient()
 
         // 録画制御ボタンの設定
         binding.btnStartRecording.setOnClickListener {
+            soundManager.playButtonClick50()
             startRecording()
         }
 
         binding.btnStopRecording.setOnClickListener {
+            soundManager.playButtonClick50()
             stopRecording()
         }
 
         // 追加部分：カメラ切り替えボタンの動作を設定
         binding.switchCameraButton.setOnClickListener {
+            soundManager.playButtonClick50()
             isFrontCamera = !isFrontCamera // フロント/バックを切り替え
             startCamera() // カメラ再起動
         }

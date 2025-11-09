@@ -5,17 +5,17 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="24dp"
-    android:background="@drawable/result_background">
+    android:background="@color/game_background">
 
     <!-- ゲームタイトル -->
     <TextView
         android:id="@+id/tv_game_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="反射神経テスト"
+        android:text="ニンゲンヤメマスカ？"
         android:textSize="32sp"
         android:textStyle="bold"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="32dp"
         android:gravity="center" />
 
@@ -24,9 +24,9 @@
         android:id="@+id/tv_instruction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="開始ボタンを押すと、1〜3秒後にボタンが表示されます。\nできるだけ早くボタンを押してください！"
+        android:text="開始ボタンを押すと、PUSHボタンが表示されます。\nできるだけ早くボタンを押してください！"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="48dp"
         android:gravity="center"
         android:lineSpacingExtra="4dp" />
@@ -36,11 +36,11 @@
         android:id="@+id/btn_start_game"
         android:layout_width="200dp"
         android:layout_height="80dp"
-        android:text="ゲーム開始"
+        android:text="ヤメマス"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:background="@drawable/button_primary"
-        android:textColor="@color/white"
+        android:background="@drawable/button_game_primary"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="32dp" />
 
     <!-- 反応ボタン（ゲーム中に表示） -->
@@ -48,25 +48,58 @@
         android:id="@+id/btn_reaction"
         android:layout_width="250dp"
         android:layout_height="250dp"
-        android:text="押せ！"
+        android:text="PUSH！"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:background="@drawable/button_record"
-        android:textColor="@color/white"
+        android:background="@drawable/button_game_reaction"
+        android:textColor="@color/game_text"
         android:visibility="gone"
         android:layout_marginBottom="32dp" />
 
-    <!-- 結果表示エリア -->
-    <TextView
-        android:id="@+id/tv_result"
+    <!-- シンプルな結果表示 -->
+    <LinearLayout
+        android:id="@+id/result_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="結果"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@color/white"
-        android:layout_marginBottom="24dp"
-        android:visibility="gone" />
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        android:background="@drawable/result_card_background"
+        android:padding="32dp"
+        android:layout_marginTop="50dp">
+
+        <!-- 結果タイトル -->
+        <TextView
+            android:id="@+id/tv_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="結果"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/game_text"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 反応時間表示 -->
+        <TextView
+            android:id="@+id/tv_reaction_time_in_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.000秒"
+            android:textSize="28sp"
+            android:textColor="@color/game_text"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ×ボタン -->
+        <Button
+            android:id="@+id/btn_close_result"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:text="終了"
+            android:textSize="16sp"
+            android:textColor="@color/game_text"
+            android:background="@drawable/button_game_secondary" />
+
+    </LinearLayout>
 
     <!-- 反応時間表示 -->
     <TextView
@@ -75,7 +108,7 @@
         android:layout_height="wrap_content"
         android:text="反応時間: 0.000秒"
         android:textSize="22sp"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="16dp"
         android:visibility="gone" />
 
@@ -86,7 +119,7 @@
         android:layout_height="wrap_content"
         android:text="ベストタイム: 0.000秒"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="8dp"
         android:visibility="gone" />
 
@@ -97,7 +130,7 @@
         android:layout_height="wrap_content"
         android:text="平均タイム: 0.000秒"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="32dp"
         android:visibility="gone" />
 
@@ -106,10 +139,10 @@
         android:id="@+id/btn_play_again"
         android:layout_width="180dp"
         android:layout_height="60dp"
-        android:text="もう一度プレイ"
+        android:text="再プレイ"
         android:textSize="16sp"
         android:background="@drawable/button_secondary"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:layout_marginBottom="16dp"
         android:visibility="gone" />
 
@@ -118,10 +151,10 @@
         android:id="@+id/btn_back_to_menu"
         android:layout_width="180dp"
         android:layout_height="60dp"
-        android:text="メニューに戻る"
+        android:text="ホームへ"
         android:textSize="16sp"
         android:background="@drawable/button_secondary"
-        android:textColor="@color/white"
+        android:textColor="@color/game_text"
         android:visibility="gone" />
 
 </LinearLayout>
