@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>手話データ収集</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+</head>
+<body>
+  <h2>手話データ収集</h2>
+  <label>ラベル: <input type="text" id="label" /></label>
+  <button onclick="startRecording()">録画（30フレーム）</button>
+  <video class="input_video" autoplay></video>
+
+  <script>
+    let recording = false;
+    let landmarkBuffer = [];
+    let frameCount = 0;
+    const maxFrames = 50;
+
+    const videoElement = document.querySelector('.input_video');
+    const hands = new Hands({ locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.7
+    });
+
+    hands.onResults(results => {
+      if (recording && results.multiHandLandmarks.length > 0 && frameCount < maxFrames) {
+        const landmarks = results.multiHandLandmarks[0].map(lm => [lm.x, lm.y, lm.z]);
+        landmarkBuffer.push(landmarks);
+        frameCount++;
+        if (frameCount >= maxFrames) {
+          stopRecording();  // 自動停止
+        }
+      }
+    });
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({ image: videoElement });
+      },
+      width: 640,
+      height: 480
+    });
+    camera.start();
+
+    function startRecording() {
+      const label = document.getElementById("label").value;
+      if (!label) {
+        alert("ラベルを入力してください！");
+        return;
+      }
+
+      recording = true;
+      frameCount = 0;
+      landmarkBuffer = [];
+      console.log("録画開始（30フレーム）");
+    }
+
+    function stopRecording() {
+      recording = false;
+
+      const label = document.getElementById("label").value;
+      if (!label || landmarkBuffer.length === 0) {
+        alert("ラベルとデータが必要です！");
+        return;
+      }
+
+      fetch("/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label: label, data: landmarkBuffer })
+      })
+      .then(res => res.text())
+      .then(res => alert(res));
+    }
+  </script>
+</body>
+</html>

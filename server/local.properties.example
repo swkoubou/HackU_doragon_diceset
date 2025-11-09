@@ -1,0 +1,10 @@
+# This is an example file. Please create a 'local.properties' file in the same directory
+# with your actual keys and do not commit it to Git.
+# The 'local.properties' file is already in .gitignore.
+
+# Your Google AI API Key
+API_KEY="YOUR_GOOGLE_AI_API_KEY_HERE"
+
+# Flask Secret Key (generate a random string for this)
+# You can use python -c 'import secrets; print(secrets.token_hex(16))' to generate one.
+SECRET_KEY="YOUR_RANDOMLY_GENERATED_SECRET_KEY_HERE"

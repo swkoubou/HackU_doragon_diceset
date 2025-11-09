@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hand Landmark Sender</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Hand Landmark Sender</h1>
+  <video id="input_video" width="640" height="480" autoplay muted></video>
+  
+  <div>
+    <p>認識結果: <span id="prediction_result">待機中...</span></p>
+    <p>信頼度: <span id="confidence">-</span></p>
+    <p>最終結果: <span id="final_result">-</span></p>
+  </div>
+
+  <script>
+    const socket = io("http://localhost:4000");
+
+    const videoElement = document.getElementById('input_video');
+    const predictionResultElement = document.getElementById('prediction_result');
+    const confidenceElement = document.getElementById('confidence');
+    const finalResultElement = document.getElementById('final_result');
+
+    const hands = new Hands({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.5
+    });
+
+    hands.onResults((results) => {
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const landmarks = results.multiHandLandmarks[0].map(lm => [lm.x, lm.y, lm.z]);
+        console.log("送信するランドマーク:", landmarks.length, "点");
+        console.log("JS landmarks", landmarks)
+
+        
+        // 修正：正しい形式でデータを送信
+        socket.emit("landmark", {
+          landmarks: landmarks
+        });
+      } else {
+        // 手が検出されない場合は空のデータを送信
+        socket.emit("landmark", null);
+      }
+    });
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({ image: videoElement });
+      },
+      width: 640,
+      height: 480
+    });
+    camera.start();
+
+    // 部分結果の受信
+    socket.on('partial_result', (data) => {
+      if (data && data.text) {
+        predictionResultElement.textContent = data.text;
+        confidenceElement.textContent = data.confidence.toFixed(2);
+        console.log("部分結果:", data.text, "信頼度:", data.confidence);
+      }
+    });
+
+    // 最終結果の受信
+    socket.on('final_result', (data) => {
+      if (data) {
+        finalResultElement.textContent = data.refined_text || data.raw_text;
+        console.log("最終結果:", data);
+      }
+    });
+
+    // セッションリセット結果
+    socket.on('session_reset', (data) => {
+      console.log("セッションリセット:", data);
+      predictionResultElement.textContent = "待機中...";
+      confidenceElement.textContent = "-";
+      finalResultElement.textContent = "-";
+    });
+
+    // 接続状態の監視
+    socket.on('connect', () => {
+      console.log('サーバーに接続しました');
+    });
+
+    socket.on('disconnect', () => {
+      console.log('サーバーから切断されました');
+    });
+  </script>
+</body>
+</html>
